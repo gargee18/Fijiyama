@@ -1,0 +1,183 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "TransformUsingMetadata",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.TransformUsingMetadata",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "DenseFieldTestScript",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.DenseFieldTestScript",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "RegistrationAutomate",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.RegistrationAutomate",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "RegistrationAutomate",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.registration.RegistrationAutomate",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "Current File",
+            "request": "launch",
+            "mainClass": "${file}"
+        },
+        {
+            "type": "java",
+            "name": "HungarianAlgorithm",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.common.HungarianAlgorithm",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "MostRepresentedFilter",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.common.MostRepresentedFilter",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "Timer",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.common.Timer",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "VitimageUtils",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.common.VitimageUtils",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "Fijiyama_GUI",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.fijiyamaplugin.Fijiyama_GUI",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "ReproducibilityTests",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.fijiyamaplugin.ReproducibilityTests",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "TestScriptBeanshell",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.fijiyamaplugin.TestScriptBeanshell",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "TestingFijiyamaPackage",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.fijiyamaplugin.TestingFijiyamaPackage",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "BlockMatchingRegistration",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.registration.BlockMatchingRegistration",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "RegistrationHighRes",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.registration.RegistrationHighRes",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "TestGargee",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.registration.TestGargee",
+            "projectName": "fijiyama",
+            "vmArgs": "-Xmx10g"
+        },
+        {
+            "type": "java",
+            "name": "TestingRegistrationPackage",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.registration.TestingRegistrationPackage",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "PaperValidation",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.rsml.PaperValidation",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "RSMLNoGUI",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.rsml.RSMLNoGUI",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "RSML_reader",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.rsml.RSML_reader",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "RootModel",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.rsml.RootModel",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "RsmlExpert_Plugin",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.rsml.RsmlExpert_Plugin",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "RsmlPhenotypingUtils",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.rsml.RsmlPhenotypingUtils",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "Test_RSMLViewer",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.rsml.Test_RSMLViewer",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "Tests",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.rsml.Tests",
+            "projectName": "fijiyama"
+        }
+    ]
+}

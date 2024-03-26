@@ -120,7 +120,7 @@ public class BlockMatchingRegistration  {
 	public boolean imageJOutputActivated=true;
 	
 	/** The default core number. */
-	public int defaultCoreNumber=12;
+	public int defaultCoreNumber=32;
 	
 	/** The resampler. */
 	public ResampleImageFilter resampler;
@@ -433,7 +433,7 @@ public class BlockMatchingRegistration  {
 		return new BlockMatchingRegistration(imgRef,imgMov,regAct.typeTrans,MetricType.SQUARED_CORRELATION,
 				regAct.sigmaResampling,regAct.sigmaDense , regAct.higherAcc==1 ? -1 : (regAct.typeTrans==Transform3DType.DENSE ? regAct.levelMinDense : regAct.levelMinLinear),
 				regAct.typeTrans==Transform3DType.DENSE ? regAct.levelMaxDense : regAct.levelMaxLinear,regAct.typeTrans==Transform3DType.DENSE ? regAct.iterationsBMDen : regAct.iterationsBMLin,
-				imgRef.getStackSize()/2,null  ,			regAct.neighX,regAct.neighY,regAct.neighZ,			regAct.bhsX,regAct.bhsY,regAct.bhsZ, 			regAct.strideX,regAct.strideY,regAct.strideZ,regAct.typeAutoDisplay);
+				imgRef.getStackSize()/2,null ,			regAct.neighX,regAct.neighY,regAct.neighZ,			regAct.bhsX,regAct.bhsY,regAct.bhsZ, 			regAct.strideX,regAct.strideY,regAct.strideZ,regAct.typeAutoDisplay);
 	}
 
 
@@ -604,6 +604,7 @@ public class BlockMatchingRegistration  {
 		if(this.displayR2) {
 			handleOutput(" |--* Beginning matching. Initial superposition with global R^2 = "+getGlobalRsquareWithActualTransform() +"\n\n");		
 		}
+		
 		String summaryUpdatesParameters="Summary of updates=\n";
 		this.updateViews(0,0,0,this.transformationType==Transform3DType.DENSE ? null : this.currentTransform.drawableString());
 		if(waitBeforeStart)VitimageUtils.waitFor(20000);
@@ -671,7 +672,7 @@ public class BlockMatchingRegistration  {
 			double[]voxSizes=VitimageUtils.getVoxelSizes(imgRefTemp);
 			timesLev[lev][1]=VitimageUtils.dou((System.currentTimeMillis()-t0)/1000.0);
 			imgRefTemp=ItkImagePlusInterface.itkImageToImagePlus(resampler.execute(ItkImagePlusInterface.imagePlusToItkImage(imgRefTemp)));
-			VitimageUtils.adjustVoxelSize(imgRefTemp, voxSizes);
+			//VitimageUtils.adjustVoxelSize(imgRefTemp, voxSizes);
 			timesLev[lev][2]=VitimageUtils.dou((System.currentTimeMillis()-t0)/1000.0);
 
 			//resample the mask image
@@ -679,7 +680,7 @@ public class BlockMatchingRegistration  {
 				this.resampler.setDefaultPixelValue(1);
 				voxSizes=VitimageUtils.getVoxelSizes(this.mask);
 				imgMaskTemp=ItkImagePlusInterface.itkImageToImagePlus(resampler.execute(ItkImagePlusInterface.imagePlusToItkImage(this.mask)));
-				VitimageUtils.adjustVoxelSize(imgMaskTemp, voxSizes);
+				//VitimageUtils.adjustVoxelSize(imgMaskTemp, voxSizes);
 			}
 			timesLev[lev][3]=VitimageUtils.dou((System.currentTimeMillis()-t0)/1000.0);
 
@@ -699,10 +700,13 @@ public class BlockMatchingRegistration  {
 				if(this.isRsml)imgMovTemp=plongement(this.imgRef,this.rootModel,false);
 				else {
 					imgMovTemp=VitimageUtils.gaussianFilteringIJ(this.imgMov, this.successiveSmoothingSigma[lev], this.successiveSmoothingSigma[lev], this.successiveSmoothingSigma[lev]);
+					//VitimageUtils.printImageResume(imgMovTemp, "Pouet 1 then DEBUG imgMovTemp: ");
 					voxSizes=VitimageUtils.getVoxelSizes(imgMovTemp);
 					imgMovTemp=ItkImagePlusInterface.itkImageToImagePlus(resampler.execute(ItkImagePlusInterface.imagePlusToItkImage(imgMovTemp)));
-					VitimageUtils.adjustVoxelSize(imgMovTemp, voxSizes);
+					//VitimageUtils.printImageResume(imgMovTemp, "Pouet 2 then DEBUG imgMovTemp: ");
+					//VitimageUtils.adjustVoxelSize(imgMovTemp, voxSizes);
 				}
+
 				timesIter[lev][iter][1]=VitimageUtils.dou((System.currentTimeMillis()-t0)/1000.0);
 
 				//Prepare a coordinate summary tabs for this blocks, compute and store their sigma
@@ -736,12 +740,13 @@ public class BlockMatchingRegistration  {
 	
 				
 				double[][] blocksRef;
-				//Trim the ones outside the mask
+				/* Remove the blocks that lie outside the mask */				
 				handleOutput("Starting trim with "+nbBlocksTotal+" blocks");
 				if(this.mask !=null)blocksRefTmp=this.trimUsingMaskNEW(blocksRefTmp,imgMaskTemp,bSX,bSY,bSZ);
 				int nbMeasured=blocksRefTmp.length;
 				handleOutput(" --> After considering the mask, "+nbMeasured+" remaining");
 				
+				/* Remove the blocks that lie outside the mask */
 				nbBlocksTotal=blocksRefTmp.length;
 				Arrays.sort(blocksRefTmp,new VarianceComparator());
 				timesIter[lev][iter][4]=VitimageUtils.dou((System.currentTimeMillis()-t0)/1000.0);				
@@ -866,15 +871,23 @@ public class BlockMatchingRegistration  {
 							for(int i=0;i<correspondancesThread.length;i++)if(correspondancesThread[i][2][0]>=minBS)nbKeep++;
 							double[][][]correspondancesThread2=new double[nbKeep][][];
 							nbKeep=0;
+
+							double totalScores=0;
+							int totalCount=0;
+
 							for(int i=0;i<correspondancesThread.length;i++){
+								totalScores+=correspondancesThread[i][2][0];
+								totalCount++;
 								if(correspondancesThread[i][2][0]>=minBS) {
 									correspondancesThread2[nbKeep]=new double[][] {{0,0,0},{0,0,0},{0,0}};
 									for(int l=0;l<3;l++)for(int c=0;c<(l==2 ? 2 : 3) ; c++ )correspondancesThread2[nbKeep][l][c]=correspondancesThread[i][l][c];
 									nbKeep++;
 								}
 							}
-							if(numThread==0)handleOutput("Sorting blocks using correspondance score. Threshold= "+minBS+" . Nb blocks before="+nbProc*correspondancesThread.length+" and after="+nbProc*nbKeep);
-	
+							if(numThread==0){
+								handleOutput("Sorting blocks using correspondance score. Threshold= "+minBS+" . Nb blocks before="+nbProc*correspondancesThread.length+" and after="+nbProc*nbKeep);
+								handleOutput("Total blocks processed by processor number 0 is : "+totalCount+" and average score was " +(totalScores/totalCount));
+							}
 							correspondances[numThread]=correspondancesThread2; 
 						} catch(Exception ie) {}
 						} 
@@ -921,6 +934,7 @@ public class BlockMatchingRegistration  {
 						listCorrespondances.add(correspondances[i][j]);	
 					}
 				}
+				handleOutput("Finally, the number of blocks that contributed to estimation was "+listCorrespondances.size());
 				timesIter[lev][iter][9]=VitimageUtils.dou((System.currentTimeMillis()-t0)/1000.0);
 			
 				
@@ -1007,13 +1021,28 @@ public class BlockMatchingRegistration  {
 					handleOutput("       Field interpolation from "+correspondancePoints[0].length+" correspondances with sigma="+this.successiveDenseFieldSigma[lev]+" "+imgRefTemp.getCalibration().getUnit()+
 							" ( "+((int)(Math.round(this.successiveDenseFieldSigma[lev]/voxSX)))+" voxSX , " +((int)(Math.round(this.successiveDenseFieldSigma[lev]/voxSY)))+" voxSY , " +((int)(Math.round(this.successiveDenseFieldSigma[lev]/voxSZ)))+" voxSZ )"  );
 					
+					/*TODO: remove this debug after, or it will slow a lot the computation
+					double sumDist=0;
+					int numVect=0;
+					for(int i=0;i<correspondancePoints[0].length;i++){
+						double dis=correspondancePoints[0][i].distanceTo(correspondancePoints[1][i]);
+						sumDist+=dis;
+						numVect++;
+
+					}
+					handleOutput("       The mean length of a vector was : "+(sumDist/numVect));
+					*/
+
 					//compute the field
+//					VitimageUtils.printImageResume(imgMovTemp, "About imgMovTemp");
+//					VitimageUtils.printImageResume(imgMov, "About imgMov");
+
 					this.currentField[this.indField++]=ItkTransform.computeDenseFieldFromSparseCorrespondancePoints(correspondancePoints,imgRefTemp,this.successiveDenseFieldSigma[lev],false);
 					timesIter[lev][iter][11]=VitimageUtils.dou((System.currentTimeMillis()-t0)/1000.0);
 					timesIter[lev][iter][12]=VitimageUtils.dou((System.currentTimeMillis()-t0)/1000.0);
 					timesIter[lev][iter][13]=VitimageUtils.dou((System.currentTimeMillis()-t0)/1000.0);
 					timesIter[lev][iter][14]=VitimageUtils.dou((System.currentTimeMillis()-t0)/1000.0);
-					
+					//new ItkTransform(new DisplacementFieldTransform( this.currentField[this.indField-1])).writeAsDenseField("/home/phukon/Desktop/testVectorField/Test_VF_NoRun/pouet.tif", imgRefTemp);
 					//Finally, add it to the current stack of transformations
 					if(this.isRsml) {
 						//System.out.println("YE"+(this.indField-1)+"\n"+this.currentField[this.indField-1]);
@@ -1432,6 +1461,8 @@ public class BlockMatchingRegistration  {
 		}
 		handleOutput("    Masking : selected "+n+" over "+n0);
 		return ret;
+
+
 	}
 	
 	/**

@@ -50,6 +50,8 @@ public class ItkTransform extends Transform{
 	/** The step. */
 	public int step=0;
 
+    public String serieOutputPath;
+
 
 	/**
 	 * Instantiates a new itk transform.
@@ -1984,6 +1986,11 @@ public class ItkTransform extends Transform{
 		
 		ImagePlus img=smoothImageFromCorrespondences(coordinates,values, imgRef,sigma,false);
 		return VitimageUtils.clipFloatImage(img, 1-percentageThreshold/100.0, 1+percentageThreshold/100.0);
+	}
+
+	public void saveSerieToFjmFile() {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'saveSerieToFjmFile'");
 	}
 	
 

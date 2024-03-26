@@ -354,7 +354,8 @@ public interface TransformUtils {
 	 * @param img the img
 	 * @return the point 3 d
 	 */
-	public static Point3d convertPointToRealSpace(Point3d p,ImagePlus img) {
+		/** The reference. */
+		public static Point3d convertPointToRealSpace(Point3d p,ImagePlus img) {
 		double alpha=0;//for itk
 		return new Point3d((p.x+alpha)*img.getCalibration().pixelWidth , (p.y+alpha)*img.getCalibration().pixelHeight , (p.z+alpha)*img.getCalibration().pixelDepth);
 	}
@@ -391,6 +392,9 @@ public interface TransformUtils {
 	/**
 	 * IO Utilities for Vectors and Matrices.
 	 *
+	 * 
+	 * 
+	 * 
 	 * @param vect the vect
 	 * @param vectNom the vect nom
 	 */

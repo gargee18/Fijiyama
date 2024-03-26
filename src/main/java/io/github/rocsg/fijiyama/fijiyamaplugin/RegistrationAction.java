@@ -187,6 +187,8 @@ public class RegistrationAction implements Serializable{
 	/** The param opt. */
 	public double paramOpt=8;
 
+    public Object mask;
+
 	/**
 	 * Instantiates a new registration action.
 	 *

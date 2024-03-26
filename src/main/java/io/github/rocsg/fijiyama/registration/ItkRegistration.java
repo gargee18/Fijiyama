@@ -1037,6 +1037,11 @@ public class ItkRegistration{
 	public ItkTransform getCurrentTransform() {
 		return new ItkTransform(this.transform);
 	}
+
+    public void displayRegistration() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'displayRegistration'");
+    }
 	
 
 	

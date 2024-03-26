@@ -1,0 +1,237 @@
+import ij.IJ;
+import ij.ImagePlus;
+import ij.process.ImageProcessor;
+
+public class ImageProcessor {
+    
+    public static ImagePlus applyTransformation3D(ImagePlus inputImage, double[][] transformationMatrix, int cropWidth, int cropHeight) {
+        int width = cropWidth;  // Adjusted width based on crop
+        int height = cropHeight;  // Adjusted height based on crop
+        int depth = inputImage.getStackSize();
+        
+        ImagePlus transformedImage = IJ.createHyperStack("Transformed Image", width, height, 1, depth, 1, 8);
+        
+        for (int z = 1; z <= depth; z++) {
+            inputImage.setSlice(z);
+            ImageProcessor inputProcessor = inputImage.getProcessor();
+            ImageProcessor transformedProcessor = inputProcessor.duplicate();
+            
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    double[] result = applyTransformationMatrix(transformationMatrix, x, y);
+                    int newX = (int) result[0];
+                    int newY = (int) result[1];
+                    transformedProcessor.putPixel(x, y, inputProcessor.getPixel(newX, newY));
+                }
+            }
+            
+            transformedImage.getStack().setProcessor(transformedProcessor, z);
+        }
+        
+        return transformedImage;
+    }
+    
+    private static double[] applyTransformationMatrix(double[][] transformationMatrix, int x, int y) {
+        double[] result = new double[2];
+        result[0] = transformationMatrix[0][0] * x + transformationMatrix[0][1] * y + transformationMatrix[0][3];
+        result[1] = transformationMatrix[1][0] * x + transformationMatrix[1][1] * y + transformationMatrix[1][3];
+        return result;
+    }
+    
+    public static void main(String[] args) {
+        // Open input image
+        ImagePlus img_reff = IJ.openImage("/home/phukon/Desktop/registration/cep_1181/raw/1181_2022.tif");
+        
+        // Define translation values and crop dimensions
+        double translationX = 10.0;
+        double translationY = 20.0;
+        double translationZ = 5.0;
+        int cropWidth = 100;
+        int cropHeight = 100;
+
+        // Call cropMatrixRef method with translation and crop parameters
+        double[][] translationMatrix = cropMatrixRef(translationX, translationY, translationZ, cropWidth, cropHeight);
+
+        // Apply transformation to input image
+        ImagePlus croppedImage = applyTransformation3D(img_reff, translationMatrix, cropWidth, cropHeight);
+
+        // Show transformed image
+        croppedImage.show();
+
+        // Close previously opened images
+        img_reff.close();
+    }
+    
+    public static double[][] cropMatrixRef(double translationX, double translationY, double translationZ, int cropWidth, int cropHeight) {
+        double[][] Tcrop22 = {
+            {1.0, 0.0, 0.0, -translationX + cropWidth / 2},
+            {0.0, 1.0, 0.0, -translationY + cropHeight / 2},
+            {0.0, 0.0, 1.0, -translationZ},
+            {0.0, 0.0, 0.0, 1.0}
+        };
+        return Tcrop22;
+    }
+}
+
+
+
+
+
+
+ // Dimensions of the input image
+ int width = inputImage.getWidth();;  
+ int height =  inputImage.getHeight();  
+ int depth = inputImage.getStackSize();
+ 
+ // Blank image to store the transformed image
+ ImagePlus transformedImage = IJ.createHyperStack("Transformed Image", width, height, 1, depth, 1, 8);
+ 
+ // Define the dimensions of the cropped hyperstack
+ int croppedWidth = 100; // Example cropped width
+ int croppedHeight = 100; // Example cropped height
+ int croppedDepth = depth; // Keep the same depth
+
+ // Create a new blank ImagePlus object with the specified dimensions
+ ImagePlus croppedImage = IJ.createHyperStack("Cropped Image", croppedWidth, croppedHeight, 1, croppedDepth, 1, 8);
+
+
+ // Get the pixel data from the input image
+ for (int z = 1; z <= depth; z++) { // iterates over each slice of the input image
+     inputImage.setSlice(z); // sets the current slice of the input image.
+     ImageProcessor inputProcessor = inputImage.getProcessor();
+     ImageProcessor transformedProcessor = inputProcessor.duplicate();
+     
+     /*
+      * Nested loops iterate over each pixel in the current slice. 
+      * For each pixel, the transformation matrix is applied to determine the new coordinates after transformation.
+      */
+     for (int y = 0; y < height; y++) {
+         for (int x = 0; x < width; x++) {
+             double[] result = applyTransformationMatrix(transformationMatrix, x, y, z); // Applies the transformation matrix to the current pixel coordinates.
+             int newX = (int) result[0]; // Extracts the new x and y coordinates after transformation.
+             int newY = (int) result[1];
+             int pixelValue = inputProcessor.getPixel(newX, newY); // Retrieves the pixel value at the transformed coordinates from the input image.
+             transformedProcessor.putPixel(x, y, pixelValue);//  Sets the pixel value in the transformed image processor at the original pixel coordinates.
+         }
+     }
+     
+     transformedImage.getStack().setProcessor(transformedProcessor, z);
+ }
+ 
+ return croppedImage;
+
+
+
+
+     public static ImagePlus applyTransformation(ImagePlus inputImage, double[][] transformationMatrix) {
+        // Dimensions of the input image
+        int width = inputImage.getWidth();;  
+        int height =  inputImage.getHeight();  
+        int depth = inputImage.getStackSize();
+        
+        // Blank image to store the transformed image
+        ImagePlus transformedImage = IJ.createHyperStack("Transformed Image", width, height, 1, depth, 1, 8);
+        
+
+
+        // Get the pixel data from the input image
+        for (int z = 1; z <= depth; z++) { // iterates over each slice of the input image
+            inputImage.setSlice(z); // sets the current slice of the input image.
+            ImageProcessor inputProcessor = inputImage.getProcessor();
+            ImageProcessor transformedProcessor = inputProcessor.duplicate();
+            
+            /*
+             * Nested loops iterate over each pixel in the current slice. 
+             * For each pixel, the transformation matrix is applied to determine the new coordinates after transformation.
+             */
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    double[] result = applyTransformationMatrix(transformationMatrix, x, y, z); // Applies the transformation matrix to the current pixel coordinates.
+                    int newX = (int) result[0]; // Extracts the new x and y coordinates after transformation.
+                    int newY = (int) result[1];
+                    int pixelValue = inputProcessor.getPixel(newX, newY); // Retrieves the pixel value at the transformed coordinates from the input image.
+                    transformedProcessor.putPixel(x, y, pixelValue);//  Sets the pixel value in the transformed image processor at the original pixel coordinates.
+                }
+            }
+            
+            transformedImage.getStack().setProcessor(transformedProcessor, z);
+        }
+        
+        return transformedImage;
+    }
+
+
+    System.out.println("22 is "+mainDir+"cep_"+specimen+"/"+"raw"+"/"+specimen+"_"+year1+"_crop_sub_z.tif");
+
+    System.out.println("23 is "+mainDir+"cep_"+specimen+"/"+"raw"+"/"+specimen+"_"+year2+"_crop_sub_z.tif");
+
+        /*This test is working
+        ImagePlus imgTestStep2=tCrop22Inv.transformImage(imgHighRes22, imgCrop22);
+        imgTestStep2.show();
+        imgHighRes22.show();
+        VitimageUtils.compositeNoAdjustOf(imgTestStep2, imgHighRes22).show();
+        VitimageUtils.waitFor(100000000);
+        */
+
+
+
+
+
+
+
+
+        /*This test is working
+        ImagePlus imgTestStep4=tCrop23.transformImage(imgCrop23, imgHighRes23);
+        imgTestStep4.show();
+        imgCrop23.show();
+        VitimageUtils.compositeNoAdjustOf(imgTestStep4, imgCrop22).show();
+        VitimageUtils.waitFor(100000000);
+        */        
+
+
+
+
+
+
+            /* This test works 
+        //ImagePlus imgTestInterm4=tGlobalLowRes.transformImage(imgCrop22, imgCrop23);
+        // imgTestInterm4.show();
+        //imgCrop22.show();
+        */
+
+        /* 
+        ImagePlus testResPart1=tCrop23.transformImage(imgCrop23, imgHighRes23);
+        ImagePlus testResPart2=tGlobalLowRes.transformImage(imgCrop22, testResPart1);
+        ImagePlus testResPart3=tCrop22Inv.transformImage(imgHighRes22, testResPart2);
+        testResPart3.show();
+        imgHighRes22.show();
+        VitimageUtils.waitFor(100000000);
+
+        //Test : 22 crop as fixed, 23 high res as moving
+        ItkTransform tr=tGlobalLowRes.addTransform(tCrop23);
+        ImagePlus result=tr.transformImage(imgCrop22, imgHighRes23);
+        result.show();
+        imgCrop22.show();
+        */
+
+
+
+        // Registering moving image
+        // ItkRegistration imgReg= new ItkRegistration();
+        // imgReg.setMovingImage(imgXR22);
+        // imgReg.setReferenceImage(imgMRI22);
+        // imgReg.setInitialTransformation(tManu);
+        // imgReg.setViewSlice(233);
+        // imgReg.setMetric(MetricType.MEANSQUARE);
+        // OptimizerType opt = OptimizerType.BLOCKMATCHING;
+        // SamplingStrategy samplStrat=SamplingStrategy.NONE;
+        
+        // imgReg.addStepToQueue( 1 ,    4     ,     1     ,    20  , 0.8   ,       Transform3DType.RIGID,    null,
+		// 				opt  , ScalerType.SCALER_PHYSICAL, null ,
+		// 		false,         CenteringStrategy.MASS_CENTER,    samplStrat  );
+
+
+        //         imgReg.register();
+        //         imgReg.displayRegistration();
+
+        // System.out.println("Test Finished");
