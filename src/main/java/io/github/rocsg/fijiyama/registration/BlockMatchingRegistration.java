@@ -29,14 +29,15 @@ import io.github.rocsg.fijiyama.registration.PointTabComparatorByDistanceLTS;
 import io.github.rocsg.fijiyama.registration.PointTabComparatorByScore;
 import io.github.rocsg.fijiyama.registration.Transform3DType;
 import io.github.rocsg.fijiyama.registration.VarianceComparator;
-import io.github.rocsg.fijiyama.rsml.*;
 import math3d.Point3d;
 
 // TODO: Auto-generated Javadoc
 /**
  * The Class BlockMatchingRegistration.
  */
-public class BlockMatchingRegistration  {
+
+
+ public class BlockMatchingRegistration  {
 	
 	/** The old behaviour. */
 	public boolean OLD_BEHAVIOUR=false;
@@ -248,7 +249,7 @@ public class BlockMatchingRegistration  {
 	
 	/** The slice ref. */
 	public ImagePlus sliceRef;
-	
+
 	/** The slice mov. */
 	public ImagePlus sliceMov;
 	
@@ -310,10 +311,6 @@ public class BlockMatchingRegistration  {
 	private static final double EPSILON=1E-8;
 	
 	/** The is rsml. */
-	public boolean isRsml=false;
-	
-	/** The root model. */
-	private RootModel rootModel;
 	
 	
 	public static boolean randomKeepingSelectedBlock=false;
@@ -444,49 +441,10 @@ public class BlockMatchingRegistration  {
 	 */
 	public static void main(String[]args) {
 		ImageJ ij=new ImageJ();
-//		setupAndRunRsmlBlockMatchingRegistration("/home/rfernandez/Bureau/A_Test/BPMP/Reproduction_01_avec_reseau_morgan/Train/20200826-AC-PIP_azote_Seq 6_Boite 00005_IdentificationFailed-Visu.jpg");
 		String dir="/home/rfernandez/Bureau/DATA/Data_Morgan/myData/train/";
 		String img="20200826-AC-PIP_azote_Seq 4_Boite 00109_IdentificationFailed-Visu.jpg";
-		setupAndRunRsmlBlockMatchingRegistration(dir+img,true,true);
 	}
 	
-	/**
-	 * Setup and run rsml block matching registration.
-	 *
-	 * @param pathToImgRef the path to img ref
-	 * @param display the display
-	 * @param multiRsml the multi rsml
-	 * @return the root model
-	 */
-	public static RootModel setupAndRunRsmlBlockMatchingRegistration(String pathToImgRef,boolean display,boolean multiRsml) {
-		ImagePlus imgRef=IJ.openImage(pathToImgRef);
-		RootModel rootModel = new RootModel(VitimageUtils.withoutExtension(pathToImgRef)+".rsml");
-		rootModel.refineDescription(10);
-		rootModel.attachLatToPrime();
-		ImagePlus imgMov=plongement(imgRef,rootModel,false);
-	    RegistrationAction regAct=RegistrationAction.defineSettingsForRSML(imgRef);    
-	    BlockMatchingRegistration bm=BlockMatchingRegistration.setupBlockMatchingRegistration(imgRef,imgMov,regAct);
-	    if(!display)bm.imageJOutputActivated=false;
-	    //bm.waitBeforeStart=false;
-	    // bm.updateViews(0, 0, 0, "Start");
-	    bm.displayRegistration=display ? 2 : 0;
-	    bm.minBlockVariance=0.05;
-	    bm.minBlockScore=0.01;
-	    bm.isRsml=true;
-	    bm.rootModel=rootModel;
-	    bm.adjustZoomFactor(512.0/imgRef.getWidth());
-	    bm.defaultCoreNumber=multiRsml ? 1 : VitimageUtils.getNbCores()/2;
-	    bm.runBlockMatching(null, false);
-	    bm.closeLastImages();
-	    bm.freeMemory();
-	    RootModel rt=bm.rootModel;
-	    bm=null;
-	    imgRef=null;
-	    imgMov=null;
-	    regAct=null;
-	    return rt ;
-	}
-
 
 	
 	public static double[][]randomSelection(double[][]blocksRef){
@@ -632,7 +590,7 @@ public class BlockMatchingRegistration  {
 			int levelStrideY=(int)Math.round(Math.max(1, -EPSILON+this.blocksStrideY/Math.pow(subSamplingFactors[1],1.0/3)));
 			int levelStrideZ=(int)Math.round(Math.max(1, -EPSILON+this.blocksStrideZ/Math.pow(subSamplingFactors[2],1.0/3)));
 			handleOutput("--> Level "+(lev+1)+"/"+nbLevels+" . Dims=("+curDims[0]+"x"+curDims[1]+"x"+curDims[2]+
-					"), search step factors =("+stepFactorX+","+stepFactorY+","+stepFactorZ+")"+" pixels."+
+					"), search step factors = one moving tested block every ("+stepFactorX+","+stepFactorY+","+stepFactorZ+")"+" pixels."+
 					" Subsample factors="+subSamplingFactors[0]+","+subSamplingFactors[1]+","+subSamplingFactors[2]+" Stride="+levelStrideX+","+levelStrideY+","+levelStrideZ);
 
 			// blocks from fixed
@@ -697,15 +655,22 @@ public class BlockMatchingRegistration  {
 				this.resampler.setTransform(this.currentTransform);
 				this.resampler.setDefaultPixelValue(this.imgMovDefaultValue);
 
-				if(this.isRsml)imgMovTemp=plongement(this.imgRef,this.rootModel,false);
-				else {
-					imgMovTemp=VitimageUtils.gaussianFilteringIJ(this.imgMov, this.successiveSmoothingSigma[lev], this.successiveSmoothingSigma[lev], this.successiveSmoothingSigma[lev]);
-					//VitimageUtils.printImageResume(imgMovTemp, "Pouet 1 then DEBUG imgMovTemp: ");
-					voxSizes=VitimageUtils.getVoxelSizes(imgMovTemp);
-					imgMovTemp=ItkImagePlusInterface.itkImageToImagePlus(resampler.execute(ItkImagePlusInterface.imagePlusToItkImage(imgMovTemp)));
-					//VitimageUtils.printImageResume(imgMovTemp, "Pouet 2 then DEBUG imgMovTemp: ");
-					//VitimageUtils.adjustVoxelSize(imgMovTemp, voxSizes);
-				}
+
+				// if(this.isRsml)imgMovTemp=plongement(this.imgRef,this.rootModel,false);
+				// else {
+				// 	imgMovTemp=VitimageUtils.gaussianFilteringIJ(this.imgMov, this.successiveSmoothingSigma[lev], this.successiveSmoothingSigma[lev], this.successiveSmoothingSigma[lev]);
+				// 	//VitimageUtils.printImageResume(imgMovTemp, "Pouet 1 then DEBUG imgMovTemp: ");
+				// 	voxSizes=VitimageUtils.getVoxelSizes(imgMovTemp);
+				// 	imgMovTemp=ItkImagePlusInterface.itkImageToImagePlus(resampler.execute(ItkImagePlusInterface.imagePlusToItkImage(imgMovTemp)));
+				// 	//VitimageUtils.printImageResume(imgMovTemp, "Pouet 2 then DEBUG imgMovTemp: ");
+				// 	//VitimageUtils.adjustVoxelSize(imgMovTemp, voxSizes);
+				// }
+
+                imgMovTemp=VitimageUtils.gaussianFilteringIJ(this.imgMov, this.successiveSmoothingSigma[lev], this.successiveSmoothingSigma[lev], this.successiveSmoothingSigma[lev]);
+                voxSizes=VitimageUtils.getVoxelSizes(imgMovTemp);
+                imgMovTemp=ItkImagePlusInterface.itkImageToImagePlus(resampler.execute(ItkImagePlusInterface.imagePlusToItkImage(imgMovTemp)));
+                //VitimageUtils.adjustVoxelSize(imgMovTemp, voxSizes);
+            
 
 				timesIter[lev][iter][1]=VitimageUtils.dou((System.currentTimeMillis()-t0)/1000.0);
 
@@ -798,6 +763,11 @@ public class BlockMatchingRegistration  {
 				final int nbTotalBlock=blocksRef.length;
 				this.threads = VitimageUtils.newThreadArray(nbProc);    
 				timesIter[lev][iter][6]=VitimageUtils.dou((System.currentTimeMillis()-t0)/1000.0);
+                /*VitimageUtils.printImageResume(imgRefTemp,"In image ");
+                System.out.println("Blocks correspondences looked at :");
+                System.out.println("X from "+(-nSX*strideMoving*stepFactorX)+" to "+(nSX*strideMoving*stepFactorX)+" by steps of "+(strideMoving*stepFactorX));
+                System.out.println("Y from "+(-nSY*strideMoving*stepFactorY)+" to "+(nSX*strideMoving*stepFactorY)+" by steps of "+(strideMoving*stepFactorY));
+                System.out.println("Z from "+(-nSZ*strideMoving*stepFactorZ)+" to "+(nSZ*strideMoving*stepFactorZ)+" by steps of "+(strideMoving*stepFactorZ));*/
 				for (int ithread = 0; ithread < nbProc; ithread++) {  
 					this.threads[ithread] = new Thread() {  { setPriority(Thread.NORM_PRIORITY); }  
 
@@ -1044,17 +1014,7 @@ public class BlockMatchingRegistration  {
 					timesIter[lev][iter][14]=VitimageUtils.dou((System.currentTimeMillis()-t0)/1000.0);
 					//new ItkTransform(new DisplacementFieldTransform( this.currentField[this.indField-1])).writeAsDenseField("/home/phukon/Desktop/testVectorField/Test_VF_NoRun/pouet.tif", imgRefTemp);
 					//Finally, add it to the current stack of transformations
-					if(this.isRsml) {
-						//System.out.println("YE"+(this.indField-1)+"\n"+this.currentField[this.indField-1]);
-						
-						ItkTransform tr=new ItkTransform(new DisplacementFieldTransform( new Image(this.currentField[this.indField-1])));
-						System.out.println("Mean distance after trans="+tr.meanDistanceAfterTrans(imgRefTemp,100,100,1,true)[0]);
-						rootModel.applyTransformToGeometry(tr);
-						this.currentTransform.addTransform(tr);
-					}
-					else{
-						this.currentTransform.addTransform(new ItkTransform(new DisplacementFieldTransform( this.currentField[this.indField-1])));
-					}
+                    this.currentTransform.addTransform(new ItkTransform(new DisplacementFieldTransform( this.currentField[this.indField-1])));
 					timesIter[lev][iter][15]=VitimageUtils.dou((System.currentTimeMillis()-t0)/1000.0);
 					
 				}
@@ -1506,18 +1466,6 @@ public class BlockMatchingRegistration  {
 	
 	
 
-	/**
-	 * Plongement.
-	 *
-	 * @param ref the ref
-	 * @param rootModel the root model
-	 * @param addCrosses the add crosses
-	 * @return the image plus
-	 */
-	public static ImagePlus plongement(ImagePlus ref, RootModel rootModel, boolean addCrosses) {
-		return rootModel.createGrayScaleImage(ref,1,false,addCrosses,1); 
-	}
-	
 
 	/**
 	 *  display registration and informations during execution.  
@@ -1539,8 +1487,7 @@ public class BlockMatchingRegistration  {
 			return;
 		}
 		handleOutput("Updating the views...");
-		if(this.isRsml)this.sliceMov=plongement(this.imgRef,this.rootModel,true);
-		else this.sliceMov=ItkImagePlusInterface.itkImageToImagePlusStack(ItkImagePlusInterface.imagePlusToItkImage(this.currentTransform.transformImage(this.imgRef,this.imgMov,false)),this.sliceInt);
+        this.sliceMov=ItkImagePlusInterface.itkImageToImagePlusStack(ItkImagePlusInterface.imagePlusToItkImage(this.currentTransform.transformImage(this.imgRef,this.imgMov,false)),this.sliceInt);
 		if(flagRange)this.sliceMov.setDisplayRange(movRange[0], movRange[1]);
 		else this.sliceMov.resetDisplayRange();
 		VitimageUtils.convertToGray8(sliceMov);
@@ -1577,11 +1524,7 @@ public class BlockMatchingRegistration  {
 
 			if(displayRegistration>1) {
 				ImagePlus tempImg=VitimageUtils.getBinaryGrid(this.imgRef, 10);
-				if(this.isRsml) {
-					if(this.indField==0) {this.sliceGrid=tempImg.duplicate();}
-					
-				}
-				else this.sliceGrid=this.currentTransform.transformImage(tempImg,tempImg,false);
+                this.sliceGrid=this.currentTransform.transformImage(tempImg,tempImg,false);
 				this.sliceGrid.setSlice(this.sliceInt);
 				this.sliceGrid.show();
 				this.sliceGrid.setTitle("Transform visualization on a uniform 3D grid");
@@ -1628,18 +1571,9 @@ public class BlockMatchingRegistration  {
 
 				
 				tempImg=VitimageUtils.getBinaryGrid(this.imgRef, 10);
-				if(!isRsml || (this.indField==0)) {
-					tempImg=this.currentTransform.transformImage(tempImg,tempImg,false);
-					//if(isRsml)IJ.run(tempImg,"RGB Color","");
-				}
+				tempImg=this.currentTransform.transformImage(tempImg,tempImg,false);
 				
-				else {
-					tempImg=new ItkTransform(new DisplacementFieldTransform( new Image(this.currentField[this.indField-1]))).transformImage(tempImg,tempImg,false);
-					tempImg=displayDistanceMapOnGrid(new ItkTransform(new DisplacementFieldTransform( new Image(this.currentField[this.indField-1]) ) ),tempImg );
-					
-				}
 				VitimageUtils.actualizeData(tempImg,this.sliceGrid);//TODO : do it using the reaffectation of the pixel value pointer
-				if(isRsml)IJ.run(this.sliceGrid,"Fire","");
 			}
 		}
 	}
@@ -1670,14 +1604,7 @@ public class BlockMatchingRegistration  {
 		ImagePlus maskGrid=VitimageUtils.makeOperationOnOneImage(gridTemp, 2,1/255.0,true);
 		ImagePlus gridResidual=VitimageUtils.makeOperationOnOneImage(gridTemp, 2,1/15.0,true);
 		ImagePlus test=VitimageUtils.makeOperationBetweenTwoImages(maskGrid,distMap,2,true);
-		ImagePlus maskRoot=VitimageUtils.getBinaryMask(plongement(this.imgRef,this.rootModel,false), 10);
-		ImagePlus maskOutRoot=VitimageUtils.gaussianFiltering(maskRoot, 10,10,0);
-		maskOutRoot=VitimageUtils.getBinaryMaskUnary(maskOutRoot, 4);
-		
-//		maskRoot.duplicate().show();
-//		VitimageUtils.waitFor(10000);
-		test=VitimageUtils.makeOperationBetweenTwoImages(test, maskRoot, 1, true);
-		test=VitimageUtils.makeOperationBetweenTwoImages(test, maskOutRoot, 2, true);
+
 		test=VitimageUtils.makeOperationBetweenTwoImages(test, gridResidual, 1, true);
 		test.setDisplayRange(0, 255);
 		test=VitimageUtils.convertToFloat(test);
@@ -1723,7 +1650,7 @@ public class BlockMatchingRegistration  {
 	
 	/**
 	 * Handle output.
-	 *
+	 * 
 	 * @param s the s
 	 */
 	public void handleOutput(String s) {
@@ -2092,7 +2019,6 @@ class ScoreComparator implements java.util.Comparator {
 	   return (new Double(((double[][]) o1)[2][0])).compareTo(new Double(((double[][]) o2)[2][0]));
    }
 }
-
 
 
 

@@ -55,8 +55,6 @@ import io.github.rocsg.fijiyama.registration.ItkTransform;
 import io.github.rocsg.fijiyama.registration.OptimizerType;
 import io.github.rocsg.fijiyama.registration.Transform3DType;
 import io.github.rocsg.fijiyama.registration.TransformUtils;
-import io.github.rocsg.fijiyama.rsml.FSR;
-import io.github.rocsg.fijiyama.rsml.RootModel;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -125,7 +123,7 @@ public class Fijiyama_GUI extends PlugInFrame implements ActionListener {
 	public String versionName="Handsome honeysuckle";
 	
 	/** The time version flag. */
-	public String timeVersionFlag="  v4.3.0 2023-12-18 -15:43 PM (Mtp), Convergence";
+	public String timeVersionFlag="  v4.4.0 2024-03-22 -17:43 PM (Mtp), New World";
 	
 	/** The version flag. */
 	public String versionFlag=versionName+timeVersionFlag;
@@ -418,10 +416,7 @@ public class Fijiyama_GUI extends PlugInFrame implements ActionListener {
 	/** The run two images button. */
 	//Launching frame buttons
 	private JButton runTwoImagesButton = new JButton("Two images registration (training mode)");
-	
-	/** The batch rsml button. */
-	private JButton batchRsmlButton = new JButton("Batch correction of Rsml files");
-	
+		
 	/** The run serie button. */
 	private JButton runSerieButton = new JButton("Series registration (N-times and/or N-modalities)");
 	
@@ -937,7 +932,6 @@ public class Fijiyama_GUI extends PlugInFrame implements ActionListener {
 		this.modeWindow=WINDOWIDLE;
 		sosButton=new JButton("Help");
 		runTwoImagesButton=new JButton("Two images registration (training mode)");
-		batchRsmlButton=new JButton("Batch correction of Rsml files");
 		runSerieButton=new JButton("Series registration (N-times and/or N-modalities)");
 		transformButton=new JButton("Apply a computed transform to another image");
 		composeTransformsButton=new JButton("Compose successive transformations into a single one");
@@ -958,7 +952,6 @@ public class Fijiyama_GUI extends PlugInFrame implements ActionListener {
 		buttonPanel.add(runTwoImagesButton);
 		buttonPanel.add(runSerieButton);
 		buttonPanel.add(loadFjmButton);
-		buttonPanel.add(batchRsmlButton);
 		buttonPanel.add(transformButton);
 		buttonPanel.add(composeTransformsButton);
 		buttonPanel.add(sosButton);
@@ -990,7 +983,6 @@ public class Fijiyama_GUI extends PlugInFrame implements ActionListener {
 		if(expectedState) {
 			sosButton.setEnabled(true);
 			runTwoImagesButton.setEnabled(true);
-			batchRsmlButton.setEnabled(true);
 			runSerieButton.setEnabled(true);
 			composeTransformsButton.setEnabled(true);
 			transformButton.setEnabled(true);
@@ -998,7 +990,6 @@ public class Fijiyama_GUI extends PlugInFrame implements ActionListener {
 			
 			sosButton.addActionListener(this);
 			runTwoImagesButton.addActionListener(this);
-			batchRsmlButton.addActionListener(this);
 			runSerieButton.addActionListener(this);
 			transformButton.addActionListener(this);
 			composeTransformsButton.addActionListener(this);
@@ -1007,7 +998,6 @@ public class Fijiyama_GUI extends PlugInFrame implements ActionListener {
 		else {
 			sosButton.setEnabled(false);
 			runTwoImagesButton.setEnabled(false);
-			batchRsmlButton.setEnabled(false);
 			runSerieButton.setEnabled(false);
 			transformButton.setEnabled(false);
 			composeTransformsButton.setEnabled(false);
@@ -1015,7 +1005,6 @@ public class Fijiyama_GUI extends PlugInFrame implements ActionListener {
 
 			sosButton.removeActionListener(this);
 			runTwoImagesButton.removeActionListener(this);
-			batchRsmlButton.removeActionListener(this);
 			runSerieButton.removeActionListener(this);
 			transformButton.removeActionListener(this);			
 			composeTransformsButton.removeActionListener(this);			
@@ -1044,11 +1033,11 @@ public class Fijiyama_GUI extends PlugInFrame implements ActionListener {
 			startTwoImagesRegistration();
 			modeWindow=WINDOWTWOIMG;
 		}
-		else if(e.getSource()==this.batchRsmlButton) {
+		/*else if(e.getSource()==this.batchRsmlButton) {
 			startBatchRsml(null,null,true);
 			frameLaunch.setVisible(false);
 			modeWindow=WINDOWTWOIMG;
-		}
+		}*/
 	
 		else if(e.getSource()==this.runSerieButton) {
 			modeWindow=WINDOWSERIEPROGRAMMING;
@@ -1170,7 +1159,7 @@ public class Fijiyama_GUI extends PlugInFrame implements ActionListener {
 		if(this.modeWindow==WINDOWIDLE) {
 			performActionInLaunchingInterface(e);return;
 		}
-		if((e.getSource()==this.runTwoImagesButton || e.getSource()==this.batchRsmlButton ||  e.getSource()==this.loadFjmButton ||e.getSource()==this.runSerieButton || e.getSource()==this.transformButton || e.getSource()==this.composeTransformsButton)
+		if((e.getSource()==this.runTwoImagesButton || e.getSource()==this.loadFjmButton ||e.getSource()==this.runSerieButton || e.getSource()==this.transformButton || e.getSource()==this.composeTransformsButton)
 				&& this.registrationFrame!=null && this.registrationFrame.isVisible()) {
 			IJ.showMessage("A Registration manager is running, with the corresponding interface open. Please close this interface before any other operation.");
 			return;
@@ -1736,133 +1725,8 @@ public class Fijiyama_GUI extends PlugInFrame implements ActionListener {
 	}
 
 
-	/**
-	 * Start batch rsml.
-	 *
-	 * @param dirIn the dir in
-	 * @param dirOutTemp the dir out temp
-	 * @param multiThread the multi thread
-	 */
-	public static void startBatchRsml(String dirIn,String dirOutTemp,boolean multiThread) {
-		if(dirIn==null) {
-			dirIn=VitiDialogs.chooseDirectoryUI("Select input dir.","Select an input directory with couples files (rsml , image)");
-			dirOutTemp=VitiDialogs.chooseDirectoryUI("Select output dir","Select an output directory to begin a new work");
-		}
-		final String dirOut=new String(dirOutTemp);
-		if(new File(dirOut).list().length>0) {
-			if(!VitiDialogs.getYesNoUI("Warning", "Warning: there seems to be other files in the output dir. Risk of erasing older files. Process anyway ?"))return;
-		}
-		final String[][]filesList=rsmlFilesList(dirIn,dirOut);
-		for(int i=0;i<filesList[0].length;i++) {
-			System.out.println("At start, file["+i+"]="+filesList[0][i]);
-		}
-		if(filesList==null) {IJ.showMessage("Critical fail : bogus rsml file list, rsml and image files does not match. Next time, please provide a well-formed directory with couples (rsml, image) files, with the same basename");return;}
-		int nImgs=filesList[0].length;
-		int nMins=1*nImgs;
-		boolean display = VitiDialogs.getYesNoUI("Dynamic display", "This procedure will register automatically "+nImgs+" rsml files. A very fancy live display of correction is available. Computation time : 3 mn / rsml with display, 1 mn without. Use the fancy display ?");
-		IJ.log("Starting correction of a bunch of "+nImgs+" Rsml files. Multithreading on "+VitimageUtils.getNbCores());
-		IJ.log("Expected total computation time = "+nMins+" minutes");
-		Timer t=new Timer();
-		int N=filesList[0].length;
-		FSR sr= (new FSR());
-		sr.initialize();
 
-		if(display)multiThread=false;
 
-		if(multiThread) {
-			int Ncores=VitimageUtils.getNbCores()/4;
-			Thread[]tabThreads=VitimageUtils.newThreadArray(Ncores);
-			final int[][]tab=VitimageUtils.listForThreads(N, Ncores);
-			AtomicInteger atomNumThread=new AtomicInteger(0);
-			
-			for (int ithread = 0; ithread < Ncores; ithread++) {  
-				tabThreads[ithread] = new Thread() {
-					{ setPriority(Thread.NORM_PRIORITY); }  
-					public void run() {  		
-						int tInd=atomNumThread.getAndIncrement();
-						for(int i=0;i<tab[tInd].length;i++) {
-							int imgInd=tab[tInd][i];
-//							System.out.println("In thread "+tInd+" processing index "+tInd+" = "+);
-							IJ.log("\nStarting processing Rsml # "+(imgInd+1)+" / "+N+" at "+t.toCuteString());
-							if(new File(filesList[1][imgInd]).exists()) {
-								IJ.log("Skipping rsml cause output file already exists : "+filesList[1][imgInd]);
-								continue;
-							}
-							RootModel r=BlockMatchingRegistration.setupAndRunRsmlBlockMatchingRegistration(filesList[0][imgInd], display,true);
-							r.writeRSML(filesList[3][imgInd], dirOut);
-							ImagePlus img=IJ.openImage(filesList[0][imgInd]);
-							IJ.save(img, filesList[1][imgInd]);
-							IJ.log("\nFinished processing Rsml # "+(imgInd+1)+" / "+N+" at "+t.toCuteString());
-							r.clearDatafile();
-							r=null;
-							img=null;
-							
-						}
-					}
-				};  		
-			}				
-			VitimageUtils.startNoJoin(tabThreads);
-		}
-		else {
-			for(int i=0;i<N;i++) {
-				IJ.log("\nStarting processing Rsml # "+(i+1)+" / "+N+" at "+t.toCuteString());
-				if(new File(filesList[1][i]).exists()) {
-					IJ.log("Skipping rsml cause output file already exists : "+filesList[1][i]);
-					continue;
-				}
-				RootModel r=BlockMatchingRegistration.setupAndRunRsmlBlockMatchingRegistration(filesList[0][i], display,false);
-				r.writeRSML(filesList[3][i], dirOut);
-				ImagePlus img=IJ.openImage(filesList[0][i]);
-				IJ.save(img, filesList[1][i]);
-				IJ.log("\nFinished processing Rsml # "+(i+1)+" / "+N+" at "+t.toCuteString());
-				r.clearDatafile();
-				r=null;
-				img=null;
-			}
-		}
-	}
-	
-	/**
-	 * Rsml files list.
-	 *
-	 * @param dirIn the dir in
-	 * @param dirOut the dir out
-	 * @return the string[][]
-	 */
-	public static String[][] rsmlFilesList(String dirIn,String dirOut){
-		boolean debug=true;
-		String []initNames=new File(dirIn).list();
-		int Ninit=initNames.length;
-		int Nrsml=Ninit/2;
-		int count=0;
-		if((Ninit%2)==1) {IJ.showMessage("Fail in RSML file list : number of input files is not multiple of 2"); return null;}
-		for(String file : initNames) {if ( file.substring(file.lastIndexOf('.')).equals(".rsml") )count++;}
-		if(count !=Nrsml){IJ.showMessage("Fail in RSML file list : number of rsml files is not half the number of total input files"); return null;}
-		String[][]ret=new String[4][Nrsml];
-		int incr=0;
-		for(String imgName : initNames) {
-			if( ! imgName.substring(imgName.lastIndexOf('.')).equals(".rsml") ) {
-				String rsmlName=VitimageUtils.withoutExtension(imgName)+".rsml";
-				ret[0][incr]=new File(dirIn,imgName).getAbsolutePath();
-				ret[1][incr]=new File(dirOut,imgName).getAbsolutePath();
-				ret[2][incr]=new File(dirIn,rsmlName).getAbsolutePath();
-				ret[3][incr]=new File(dirOut,rsmlName).getAbsolutePath();
-				if(! new File(dirIn,rsmlName).exists()){IJ.showMessage("Fail in RSML file list : there is no rsml file corresponding to image "+(new File(dirIn,imgName).getAbsolutePath())); return null;}
-				incr++;						
-			}
-		}
-		IJ.log("Ready to process "+Nrsml+" couples of (img, rsml) files");
-		if(debug) {
-			for(int i=0;i<ret[0].length;i++) {
-				System.out.println();
-				System.out.println(ret[0][i]);
-				System.out.println(ret[1][i]);
-				System.out.println(ret[2][i]);
-				System.out.println(ret[3][i]);
-			}
-		}
-		return ret;
-	}
 
 
 	
@@ -2495,7 +2359,6 @@ public class Fijiyama_GUI extends PlugInFrame implements ActionListener {
 			case FINISH:this.finishButton.setEnabled(state);break;
 			case SOS:this.sosButton.setEnabled(state);break;
 			case RUNTWOIMG:this.runTwoImagesButton.setEnabled(state);break;
-			case BATCHRSML:this.batchRsmlButton.setEnabled(state);break;
 			case RUNSERIE:this.runSerieButton.setEnabled(state);break;
 			case RUNNEXTSTEP:this.runNextStepButton.setEnabled(state);break;
 			case GOBACKSTEP:this.goBackStepButton.setEnabled(state);break;
