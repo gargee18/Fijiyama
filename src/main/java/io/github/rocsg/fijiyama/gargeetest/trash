@@ -235,3 +235,10 @@ public class ImageProcessor {
         //         imgReg.displayRegistration();
 
         // System.out.println("Test Finished");
+
+
+        ////// Show single specimen (testing)
+            //if(specimen != null){
+                //ImagePlus imgFus = VitimageUtils.compositeNoAdjustOf(imgHighRes22, finalResult);
+                
+            //}
