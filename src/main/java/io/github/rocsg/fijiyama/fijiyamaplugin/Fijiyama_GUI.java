@@ -2,7 +2,6 @@
  * 
  */
 package io.github.rocsg.fijiyama.fijiyamaplugin;
-
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.GridLayout;
@@ -123,7 +122,7 @@ public class Fijiyama_GUI extends PlugInFrame implements ActionListener {
 	public String versionName="Handsome honeysuckle";
 	
 	/** The time version flag. */
-	public String timeVersionFlag="  v4.4.0 2024-03-22 -17:43 PM (Mtp), New World";
+	public String timeVersionFlag="  v4.4.0-SNAPSHOT 2024-04-10 -2:30 PM (CEST), Adventure land";
 	
 	/** The version flag. */
 	public String versionFlag=versionName+timeVersionFlag;
@@ -902,6 +901,7 @@ public class Fijiyama_GUI extends PlugInFrame implements ActionListener {
                    registrationFrame.setVisible(false);
                    regManager.freeMemory();
                    closeAllViews();
+				   if(developerMode)System.exit(0);
                }
 		});
 		updateList();
@@ -968,6 +968,7 @@ public class Fijiyama_GUI extends PlugInFrame implements ActionListener {
                   IJ.showMessage("See you next time !");
                   regManager.freeMemory();
                   closeAllViews();
+				  if(developerMode)System.exit(0);
             }
 		});
 		frameLaunch.setVisible(true);

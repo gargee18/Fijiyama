@@ -1,6 +1,11 @@
 package io.github.rocsg.fijiyama.common;
 
 
+
+import java.lang.Runtime;
+import java.lang.Runnable;
+import java.lang.InterruptedException;
+import java.lang.IllegalArgumentException;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Frame;
@@ -19,6 +24,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.concurrent.TimeUnit ;
 
@@ -62,8 +68,6 @@ import ij.process.ImageProcessor;
 import ij.process.ImageStatistics;
 import ij.process.LUT;
 import ij.process.StackConverter;
-import io.github.rocsg.fijiyama.common.Bord;
-import io.github.rocsg.fijiyama.common.Pix;
 import io.github.rocsg.fijiyama.common.VitimageUtils;
 import io.github.rocsg.fijiyama.registration.ItkTransform;
 import io.github.rocsg.fijiyama.registration.TransformUtils;
@@ -1947,7 +1951,9 @@ public class VitimageUtils {
 	
 	
 	
-	
+	public static ImagePlus actualizeData(ImagePlus source,ImagePlus dest) {
+		return actualizeDataOld(source,dest);
+	}
 
 	
 	/**
@@ -1958,7 +1964,7 @@ public class VitimageUtils {
 	 * @return the image plus
 	 */
 	/*Various implementations of image composition, for registration visual assessment */
-	public static ImagePlus actualizeData(ImagePlus source,ImagePlus dest) {
+	public static ImagePlus actualizeDataOld(ImagePlus source,ImagePlus dest) {
 		int[]dims=VitimageUtils.getDimensions(source);
 		int Z=dims[2];int Y=dims[1];int X=dims[0];
 		if(source.getType() == ImagePlus.GRAY8) {
@@ -2008,6 +2014,74 @@ public class VitimageUtils {
 		
 	}
 	
+
+
+
+
+
+	public static ImagePlus actualizeDataMultiThread(ImagePlus source, ImagePlus dest) {
+		int[] dims = VitimageUtils.getDimensions(source);
+		int Z = dims[2];
+		int Y = dims[1];
+		int X = dims[0];
+
+		ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+
+		for (int z = 0; z < Z; z++) {
+			Runnable task = createCopyTask(source, dest, z, X, Y);
+			executor.execute(task);
+		}
+
+		executor.shutdown();
+		try {
+			executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+		dest.updateAndDraw();
+		return dest;
+	}
+
+	private static Runnable createCopyTask(ImagePlus source, ImagePlus dest, int z, int X, int Y) {
+		return () -> {
+			Object sourcePixels = source.getStack().getProcessor(z + 1).getPixels();
+			Object destPixels = dest.getStack().getProcessor(z + 1).getPixels();
+
+			switch (source.getType()) {
+				case ImagePlus.GRAY8:
+					byte[] sourceValsByte = (byte[]) sourcePixels;
+					byte[] destValsByte = (byte[]) destPixels;
+					System.arraycopy(sourceValsByte, 0, destValsByte, 0, X * Y);
+					break;
+				case ImagePlus.GRAY16:
+					short[] sourceValsShort = (short[]) sourcePixels;
+					short[] destValsShort = (short[]) destPixels;
+					System.arraycopy(sourceValsShort, 0, destValsShort, 0, X * Y);
+					break;
+				case ImagePlus.GRAY32:
+					float[] sourceValsFloat = (float[]) sourcePixels;
+					float[] destValsFloat = (float[]) destPixels;
+					System.arraycopy(sourceValsFloat, 0, destValsFloat, 0, X * Y);
+					break;
+				case ImagePlus.COLOR_RGB:
+					int[] sourceValsInt = (int[]) sourcePixels;
+					int[] destValsInt = (int[]) destPixels;
+					System.arraycopy(sourceValsInt, 0, destValsInt, 0, X * Y);
+					break;
+				default:
+					throw new IllegalArgumentException("Unsupported image type");
+			}
+		};
+	}
+
+
+
+
+
+
+
+
 	/**
 	 * Composite RGB double jet.
 	 *
