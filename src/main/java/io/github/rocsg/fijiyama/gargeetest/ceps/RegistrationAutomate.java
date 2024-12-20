@@ -1,4 +1,4 @@
-package io.github.rocsg.fijiyama.gargeetest;
+package io.github.rocsg.fijiyama.gargeetest.ceps;
 
 
 import java.util.ArrayList;
@@ -13,7 +13,8 @@ import io.github.rocsg.fijiyama.registration.BlockMatchingRegistration;
 import io.github.rocsg.fijiyama.registration.ItkTransform;
 import io.github.rocsg.fijiyama.registration.Transform3DType;
 
-
+import java.time.Duration;
+import java.time.Instant;
 
 
 public class RegistrationAutomate {
@@ -30,9 +31,10 @@ public class RegistrationAutomate {
     */
 
     //public static  String mainDir="/home/phukon/Desktop/registration/CEP_2022_XR_2023_XR_2024_XR/";// Path to the directory consisting the data
-    public static String mainDir = "/home/phukon/Desktop/mrit1_2022_mrit2_2022/";
+    public static String mainDir = "/mnt/41d6c007-0c9e-41e2-b2eb-8d9c032e9e53/gargee/Cuttings_MRI_registration/";
     public static String year1 = GeneralUtils.years[0];
     public static String year2 = GeneralUtils.years[1];
+    static String[] timestamps = new String[]{"J001", "J029", "J077", "J141"};
    
    
     
@@ -41,15 +43,46 @@ public class RegistrationAutomate {
     public static void main(String[] args) {
         ImageJ ij=new ImageJ();
         //String year1="2023";
-        //String chooseSpecimen = "1181";
-
+        // String chooseSpecimen = "B_201";
     
         String[] specimenList = GeneralUtils.getSpecimenListMRI();
-        for (String specimen : specimenList) {
-             runRigidRegistration(specimen);
+        // for (String specimen : specimenList) {
+        //      runRigidRegistration(specimen);
+        // }
+        for (int i = 201; i <= 201; i++) {
+            if (i == 204) {
+                continue;
+            }
+            String chooseSpecimen = "B_" + i;
+            Instant start = Instant.now();
+            runRigidRegistration(chooseSpecimen);
+            Instant end = Instant.now();
+            Duration duration = Duration.between(start, end);
+            long seconds = duration.getSeconds();
+            System.out.println("Elapsed time in seconds: " + seconds);
         }
-        // runRigidRegistration(chooseSpecimen);
+        //seeResultsOfRigidRegistration(chooseSpecimen);
         //System.exit(0);
+    }
+
+    public static String getPathToImageLowRes(String specimen,int step){
+              return mainDir+specimen+"/raw_subsampled/"+specimen+"_"+timestamps[step]+"_sub222.tif";
+              
+          }
+    
+    public static String getPathToImageHighRes(String specimen,int step){
+                return mainDir+specimen+"/raw/"+specimen+"_"+timestamps[step]+".tif";
+                
+    }
+    
+    public static void seeResultsOfRigidRegistration(String specimen){
+        ImagePlus imgRef = IJ.openImage(getPathToImageHighRes(specimen,0));
+        ImagePlus imgMov = IJ.openImage(getPathToImageHighRes(specimen,1));
+        ItkTransform tr=ItkTransform.readTransformFromFile(mainDir+specimen+"/transforms_corrected/Automatic_Transform_2to0.txt");
+        ImagePlus movRegistered=tr.transformImage(imgRef, imgMov);
+        VitimageUtils.compositeNoAdjustOf(imgRef, movRegistered, "composite").show();
+        
+
     }
 
     public RegistrationAutomate(){ }
@@ -59,70 +92,57 @@ public class RegistrationAutomate {
     }
     
     public static String getPathToReferenceImage(String specimen){
-        System.out.println(mainDir+"cep_"+specimen+"/raw/"+specimen+"_imgRef.tif");
-        //System.out.println(mainDir+"cep_"+specimen+"/raw/"+specimen+"_"+year1+"_crop_sub_z.tif");
-        //return mainDir+"cep_"+specimen+"/raw/"+specimen+"_"+year1+"_crop_sub_z.tif"; //
-        return mainDir+"cep_"+specimen+"/raw/"+specimen+"_imgRef.tif";
+        return mainDir+specimen+"/raw/"+specimen+"_J001_aligned.tif";
     }
 
     public static String getPathToMovingImage(String specimen){
-        //System.out.println(mainDir+"cep_"+specimen+"/raw/"+specimen+"_"+year2+"_crop_sub_z.tif");
-        System.out.println(mainDir+"cep_"+specimen+"/raw/"+specimen+"_imgMov.tif");
-        //return mainDir+"cep_"+specimen+"/raw/"+specimen+"_"+year2+"_crop_sub_z.tif"; 
-        return mainDir+"cep_"+specimen+"/raw/"+specimen+"_imgMov.tif";
+        return mainDir+specimen+"/raw/"+specimen+"_J029_normalized.tif";
     }
 
     public static String getPathToTrInit(String specimen){
-        System.out.println(mainDir+"cep_"+specimen+"/res/Exported_data/transform_global_img_moving.txt");
-        //return mainDir+"cep_"+specimen+"/result_"+year1+"_"+year2+"_manual_reg/Exported_data/transform_global_img_moving.txt";
-
-        
-       
-        return mainDir+"cep_"+specimen+"/res/Exported_data/transform_global_img_moving.txt";
+        return mainDir+specimen+"/transforms_corrected/Final_transform_001_029.txt";
     }
 
     public static String getPathToTrFinal(String specimen){
-       
-        System.out.println(mainDir+"cep_"+specimen+"/res/Exported_data/"+specimen+"_trMatrix_2023_2024.txt");
-        //return mainDir+specimen+"_XR_MRI/result_automate/"+specimen+"_trMatrix.txt";
-        return mainDir+"cep_"+specimen+"/res/Exported_data/"+specimen+"_trMatrix_2023_2024.txt";
+        return mainDir+specimen+"/transforms_corrected/testMaskedCambiumRegistration.txt";
     }
 
- 
     public static String getPathToMask(String specimen){
-        System.out.println(mainDir+"cep_"+specimen+"/raw/"+specimen+"_mask.tif");
-        return mainDir+"cep_"+specimen+"/raw/"+specimen+"_mask.tif";
+        return mainDir+specimen+"/raw/"+specimen+"_mask_cambium.tif";
     }
 
-    
 
     public static void runRigidRegistration(String specimen){
-     
+
         System.out.println("Now running Rigid Registration for specimen: " + specimen);
         System.out.println("-----------------------------------------------");
     
-
         // Open Reference and Moving Images
         ImagePlus imgRef = IJ.openImage(getPathToReferenceImage(specimen));
         ImagePlus imgMov = IJ.openImage(getPathToMovingImage(specimen));
-        
+        // ImagePlus imgRef = IJ.openImage(getPathToImageLowRes(specimen,0));
+        // System.out.println(getPathToImageLowRes(specimen,0));
+        // ImagePlus imgMov = IJ.openImage(getPathToImageLowRes(specimen,1));
+        // System.out.println(getPathToImageLowRes(specimen,1));
+        imgRef.show();
+        imgMov.show();
 
         // Get the global matrix from manual registration and run automatic registration step (rigid body)
         ItkTransform trInit=ItkTransform.readTransformFromFile(getPathToTrInit(specimen));
-        
         ItkTransform trFinal = autoLinearRegistration(imgRef,imgMov, trInit,specimen);
         ImagePlus finalResult=trFinal.transformImage(imgRef,imgMov);
-        IJ.saveAsTiff(finalResult, mainDir+"cep_"+specimen+"/res/"+specimen+"_TransformedImage.tif");
-        System.out.println(mainDir+"cep_"+specimen+"/res/"+specimen+"_TransformedImage.tif");
+
+        // IJ.saveAsTiff(finalResult, mainDir+specimen+"/outputs/"+specimen+"_001_029_TransformedImage.tif");
+        // System.out.println(mainDir+specimen+"/outputs/"+specimen+"_001_029_TransformedImage.tif");
+
         //IJ.saveAsTiff(finalResult,mainDir+specimen+"_XR_MRI/result_automate/"+specimen+"_TransformedImageXRMRI.tif");
         ImagePlus imgComposite=VitimageUtils.compositeNoAdjustOf(imgRef, finalResult);
-        IJ.saveAsTiff(imgComposite,mainDir+"cep_"+specimen+"/res/"+specimen+"_Composite.tif");
-        System.out.println(mainDir+"cep_"+specimen+"/res/"+specimen+"_Composite.tif");
+        // IJ.saveAsTiff(imgComposite,mainDir+specimen+"/outputs/"+specimen+"_001_029_Composite.tif");
+        // System.out.println(mainDir+specimen+"/outputs/"+specimen+"_001_029_Composite.tif");
         //IJ.saveAsTiff(imgComposite,mainDir+specimen+"_XR_MRI/result_automate/"+specimen+"_CompositeImageXRMRI.tif");g        imgComposite.show();
         imgComposite.close();
         imgRef.close();
         imgMov.close();
-   
         
     }
     
@@ -131,17 +151,17 @@ public class RegistrationAutomate {
         RegistrationAction regAct = new RegistrationAction();
         regAct.defineSettingsFromTwoImages(imgRef, imgMov, null, false);
         regAct.typeTrans=Transform3DType.RIGID;
-        regAct.typeAutoDisplay=2;   
+        regAct.typeAutoDisplay=0;   
         regAct.higherAcc=0; 
         regAct.levelMaxLinear=3;
-        regAct.levelMinLinear=1;
+        regAct.levelMinLinear=3;
         regAct.bhsX=3;
         regAct.bhsY=3;
-        regAct.bhsZ=1;
+        regAct.bhsZ=3;
         regAct.strideX=8;
         regAct.strideY=8;
         regAct.strideZ=8;
-        regAct.iterationsBMLin=12;
+        regAct.iterationsBMLin=8;
         regAct.neighX=2;
         regAct.neighX=2;
         regAct.neighZ=2;
@@ -203,7 +223,7 @@ public class RegistrationAutomate {
         regAct.strideY=8;
         regAct.strideZ=8;
         regAct.sigmaDense=50;
-        regAct.iterationsBMDen=8;
+        regAct.iterationsBMDen=5;
         regAct.neighX=2;
         regAct.neighX=2;
         regAct.neighZ=2;

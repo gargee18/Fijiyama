@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
+import java.util.concurrent.TimeUnit ;
 
 import org.itk.simple.Image;
 import org.itk.simple.OtsuThresholdImageFilter;
@@ -391,7 +392,7 @@ public class VitimageUtils {
 	 *
 	 * @param img the img
 	 * @return the image plus
-	 */
+	  */
 	public static ImagePlus Sub222(ImagePlus img) {
 		ResampleImageFilter res=new ResampleImageFilter();
 		res.setDefaultPixelValue(0);
@@ -901,6 +902,20 @@ public class VitimageUtils {
 		int pos = name.lastIndexOf(".");
         if (pos == -1) return name;
         return name.substring(0, pos);
+	}
+	/**
+	 * Hyper stacking channels.
+	 *
+	 * @param img the img
+	 * @return the image plus
+	 */
+	public static ImagePlus hyperStackingChannelsAfterFrames(ImagePlus[]img,int nbFrames) {
+		Concatenator con=new Concatenator();
+		con.setIm5D(true);
+		ImagePlus hypTemp=con.concatenate(img,true);
+		String codeStacking="xyztc";
+		ImagePlus hyperImage=HyperStackConverter.toHyperStack(hypTemp, img.length, img[0].getNSlices(),nbFrames,codeStacking,"Grayscale");
+		return hyperImage;
 	}
 	
 	/**
@@ -4521,7 +4536,9 @@ public static ImagePlus[]hyperUnstack(ImagePlus[]imgs){
 		int zM=(int)Math.min(zm+dimZZ-1,Z-1);
 		int dimZ=zM-zm+1;		
 		
+
 		ImagePlus out=ij.gui.NewImage.createImage("Mask",dimX,dimY,dimZ,16,ij.gui.NewImage.FILL_BLACK);		
+		
 		VitimageUtils.adjustImageCalibration(out, img);
 		for(int z=zm;z<zm+dimZ;z++) {
 			short[] valsImg=(short[])img.getStack().getProcessor(z+1).getPixels();
@@ -4703,7 +4720,7 @@ public static ImagePlus[]hyperUnstack(ImagePlus[]imgs){
 			
 			//Gather information of M0 value
 			double[]stats=VitimageUtils.statistics1D(VitimageUtils.valuesOfBlock(img3D,xLast-semiRayPix, yLast-semiRayPix, z-1,xLast+semiRayPix, yLast+semiRayPix, z+1));
-			System.out.println("Capillary detected at z="+z+" at coordinates "+xLast+", "+yLast+" with M0="+stats[0]+" std="+stats[1]);
+			System.out.println("Capillary detected at z="+z+" at coordinates x,y="+xLast+", "+yLast+" with M0="+stats[0]+" std="+stats[1]);
 			capVals[z]=stats[0];
 		}
 		return capVals;
@@ -8211,6 +8228,64 @@ public static ImagePlus[]hyperUnstack(ImagePlus[]imgs){
 		return new Point3d[] {origine,ptUp,ptRight};
 	}
 
+
+
+
+	public static ImagePlus actualizeDataMultiThread(ImagePlus source, ImagePlus dest) {
+		int[] dims = VitimageUtils.getDimensions(source);
+		int Z = dims[2];
+		int Y = dims[1];
+		int X = dims[0];
+
+		ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+
+		for (int z = 0; z < Z; z++) {
+				Runnable task = createCopyTask(source, dest, z, X, Y);
+				executor.execute(task);
+		}
+
+		executor.shutdown();
+		try {
+				executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+		} catch (InterruptedException e) {
+				e.printStackTrace();
+		}
+
+		dest.updateAndDraw();
+		return dest;
+}
+
+	private static Runnable createCopyTask(ImagePlus source, ImagePlus dest, int z, int X, int Y) {
+			return () -> {
+					Object sourcePixels = source.getStack().getProcessor(z + 1).getPixels();
+					Object destPixels = dest.getStack().getProcessor(z + 1).getPixels();
+
+					switch (source.getType()) {
+							case ImagePlus.GRAY8:
+									byte[] sourceValsByte = (byte[]) sourcePixels;
+									byte[] destValsByte = (byte[]) destPixels;
+									System.arraycopy(sourceValsByte, 0, destValsByte, 0, X * Y);
+									break;
+							case ImagePlus.GRAY16:
+									short[] sourceValsShort = (short[]) sourcePixels;
+									short[] destValsShort = (short[]) destPixels;
+									System.arraycopy(sourceValsShort, 0, destValsShort, 0, X * Y);
+									break;
+							case ImagePlus.GRAY32:
+									float[] sourceValsFloat = (float[]) sourcePixels;
+									float[] destValsFloat = (float[]) destPixels;
+									System.arraycopy(sourceValsFloat, 0, destValsFloat, 0, X * Y);
+									break;
+							case ImagePlus.COLOR_RGB:
+									int[] sourceValsInt = (int[]) sourcePixels;
+									int[] destValsInt = (int[]) destPixels;
+									System.arraycopy(sourceValsInt, 0, destValsInt, 0, X * Y);
+									break;
+							default:
+									throw new IllegalArgumentException("Unsupported image type");
+					}
+			};
+	}
 
 
 }

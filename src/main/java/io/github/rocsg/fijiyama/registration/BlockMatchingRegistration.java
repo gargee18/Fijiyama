@@ -17,17 +17,12 @@ import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
 import ij.plugin.Duplicator;
-import ij.process.ImageConverter;
-import ij.process.StackConverter;
 import io.github.rocsg.fijiyama.common.ItkImagePlusInterface;
 import io.github.rocsg.fijiyama.common.VitimageUtils;
 import io.github.rocsg.fijiyama.fijiyamaplugin.RegistrationAction;
 import io.github.rocsg.fijiyama.registration.BlockMatchingRegistration;
-import io.github.rocsg.fijiyama.registration.ItkTransform;
-import io.github.rocsg.fijiyama.registration.MetricType;
 import io.github.rocsg.fijiyama.registration.PointTabComparatorByDistanceLTS;
 import io.github.rocsg.fijiyama.registration.PointTabComparatorByScore;
-import io.github.rocsg.fijiyama.registration.Transform3DType;
 import io.github.rocsg.fijiyama.registration.VarianceComparator;
 import math3d.Point3d;
 
@@ -970,7 +965,7 @@ import math3d.Point3d;
 					String str= "Level"+(lev+1)+"/"+nbLevels+"Iteration "+(iter+1) +"/"+this.nbIterations;
 					String theta= "[thetaX, thetaY,thetaZ] = " + "[" + VitimageUtils.dou(vector[0]*180/Math.PI)+ "," + VitimageUtils.dou(vector[1]*180/Math.PI)+ "," + VitimageUtils.dou(vector[2]*180/Math.PI)+"]" ;
 					String trans= "[Tx,Ty,Tz] = " + "[" + VitimageUtils.dou(vector[3]/voxSX) + "," + VitimageUtils.dou(vector[4]/voxSY) + "," +  VitimageUtils.dou(vector[5]/voxSZ)+"]";
-					summaryUpdatesParameters+=""+ str+ " Angles(in degrees) : "+theta+ ", Translation : "+trans+" \n";
+					summaryUpdatesParameters+=""+ str+ " Angles (in degrees) : "+theta+ ", Translation (in pixels): "+trans+" \n";
 
 
 

@@ -1,4 +1,4 @@
-package io.github.rocsg.fijiyama.gargeetest;
+package io.github.rocsg.fijiyama.gargeetest.ceps;
 
 import ij.IJ;
 
@@ -25,6 +25,8 @@ public class GeneralUtils {
 
     // Specimens (XRay)
     final static String[] specimenListXR=new String[]{"313B","318","322","323","330","335","368B","378A","378B","380A","764B","988B","1181","1186A","1189","1191","1193","1195","1266A","2184A"};
+
+
 
 
     // Modalities for MRI

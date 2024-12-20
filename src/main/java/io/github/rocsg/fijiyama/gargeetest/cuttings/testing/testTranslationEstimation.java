@@ -1,4 +1,4 @@
-package io.github.rocsg.fijiyama.gargeetest;
+package io.github.rocsg.fijiyama.gargeetest.cuttings.testing;
 
 import io.github.rocsg.fijiyama.registration.ItkTransform;
 import math3d.Point3d;

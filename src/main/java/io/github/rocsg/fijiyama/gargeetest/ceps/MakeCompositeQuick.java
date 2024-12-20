@@ -1,4 +1,4 @@
-package io.github.rocsg.fijiyama.gargeetest;
+package io.github.rocsg.fijiyama.gargeetest.ceps;
 
 //specific libraries
 import ij.IJ;

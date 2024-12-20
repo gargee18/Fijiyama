@@ -73,6 +73,7 @@ public class ItkTransform extends Transform{
 		return;
 	}
 
+
 	/**
 	 * Itk transform from coefs.
 	 *
@@ -85,6 +86,14 @@ public class ItkTransform extends Transform{
 		return new ItkTransform(aff);
 	}
 	
+
+	public ItkTransform (double[]coefs) {
+		super(new org.itk.simple.AffineTransform( ItkImagePlusInterface.doubleArrayToVectorDouble(new double[] { coefs[0] , coefs[1] , coefs[2] ,      coefs[4] , coefs[5] , coefs[6] ,   coefs[8] , coefs[9] , coefs[10] } ),    
+				ItkImagePlusInterface.doubleArrayToVectorDouble( new double[] { coefs[3] , coefs[7] , coefs[11] } ), ItkImagePlusInterface.doubleArrayToVectorDouble(new double[] {0,0,0} ) ));
+		this.isDense=false;
+		this.isFlattened=true;
+	}
+
 	/**
 	 * Itk transform from DICOM vectors.
 	 *
@@ -98,6 +107,7 @@ public class ItkTransform extends Transform{
 		double []vzz=TransformUtils.vectorialProduct(new double[] {  vx[0] , vy[0] , vz[0]}, new double[] {-vx[1] ,- vy[1] , -vz[1] });
 //		return itkTransformFromCoefs(new double[] { vx[0] , -vx[1] , -vx[2] , t[0] ,          vy[0] , -vy[1] , -vy[2] , t[1] ,        vzz[0] , vzz[1] , vzz[2] , t[2]   });
 		return itkTransformFromCoefs(new double[] { vx[0] , vy[0] , vz[0] , t[0] ,          -vx[1] ,- vy[1] , -vz[1] , -t[1] ,        vzz[0] , vzz[1] , vzz[0] , -t[2]   });
+		//return itkTransformFromCoefs(new double[] { vx[0] , vy[0] , vz[0] , t[0] ,          -vx[1] ,- vy[1] , -vz[1] , -t[1] ,        -vzz[0] , -vzz[1] , -vzz[0] , -t[2]   });
 	}
 
 	/**
@@ -168,7 +178,7 @@ public class ItkTransform extends Transform{
 	/**
 	 * Ij 3 d transform to itk transform.
 	 *
-	 * @param tr the tr
+	 * @param tr is a Transform3D (ImageJ type) to be converted into an ItkTransform
 	 * @return the itk transform
 	 */
 	public static ItkTransform ij3dTransformToItkTransform(Transform3D tr) {
@@ -215,7 +225,6 @@ public class ItkTransform extends Transform{
 				ItkImagePlusInterface.doubleArrayToVectorDouble(new double[] {tab[3],tab[7],tab[11]} ),   ItkImagePlusInterface.doubleArrayToVectorDouble(   new double[] {0,0,0}  )  );
 		return new ItkTransform(aff);
 	}
-
 
 	/**
 	 * To affine array monoline representation.

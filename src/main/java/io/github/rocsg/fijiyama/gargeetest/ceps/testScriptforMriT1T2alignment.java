@@ -4,7 +4,7 @@
  */
 
 
-package io.github.rocsg.fijiyama.gargeetest;
+package io.github.rocsg.fijiyama.gargeetest.ceps;
 
 
 import java.io.File;

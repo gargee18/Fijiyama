@@ -7,7 +7,7 @@
 
 
 
-package io.github.rocsg.fijiyama.gargeetest;
+package io.github.rocsg.fijiyama.gargeetest.ceps;
 
 import ij.IJ;
 import ij.ImageJ;

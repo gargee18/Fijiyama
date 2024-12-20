@@ -6,6 +6,301 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Step_1_InocAlignment",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Step_1_InocAlignment",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "Step_0_Normalize",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Step_0_Normalize",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "MainController",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.controller.MainController",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "Specimen",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.core.Specimen",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "RegistrationAutomate",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.ceps.RegistrationAutomate",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "step_2_RegistrationRigid",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.processing.step_2_RegistrationRigid",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "step_1_Normalize",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.processing.step_1_Normalize",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "step_0_subsample",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.processing.step_0_subsample",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "AlignInoculationToDesiredCoord",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttingsatlas.AlignInoculationToDesiredCoord",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "NormalizeWithCapillary",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttingsatlas.NormalizeWithCapillary",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "RegistrationAutomate",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttingsatlas.RegistrationAutomate",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "randomtest",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.randomtest",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "RegistrationAutomateTest",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.RegistrationAutomateTest",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "TransformationMatrixCombinedWithAligningMatrix",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.TransformationMatrixCombinedWithAligningMatrix",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "CropZaxisCuttingsData",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.CropZaxisCuttingsData",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "NormalizeWithCapillary",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.NormalizeWithCapillary",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "AlignInoculationToDesiredCoord",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.AlignInoculationToDesiredCoord",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "ManualRegistration",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.ManualRegistration",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "Hyperstack",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.Hyperstack",
+            "projectName": "fijiyama",
+            "vmArgs": "-Xmx32g"
+        },
+        {
+            "type": "java",
+            "name": "trash",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.trash",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "jointHistogramAndBestFitCurve",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.jointHistogramAndBestFitCurve",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "ShortToByteImage",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.ShortToByteImage",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "RegisterXRandMRI",
+            "request": "launch",
+            "mainClass": "io.github.gargee18.gargeedev.registration.RegisterXRandMRI",
+            "projectName": "gargeedev"
+        },
+        {
+            "type": "java",
+            "name": "Crap",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.Crap",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "cropWithRoi",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.cropWithRoi",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "test",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.test",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "TestClasses",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.TestClasses",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "ImageStandardization",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.ImageStandardization",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "JointHistogramBasedSegmentation",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.JointHistogramBasedSegmentation",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "MakeCompositeQuick",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.MakeCompositeQuick",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "RegisterXRandMRI",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.RegisterXRandMRI",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "registerXRandMRI",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.registerXRandMRI",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "Test",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.Test",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "testScriptforMriT1T2alignment",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.testScriptforMriT1T2alignment",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "ArrangeDCMfiles",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.ArrangeDCMfiles",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "testdcm",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.testdcm",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "GargeeUtils",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.GargeeUtils",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "testTranslationEstimation",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.testTranslationEstimation",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "RegisterT1andT2",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.RegisterT1andT2",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "ScriptAlignmentWorkingOn22WithNoRE",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.ScriptAlignmentWorkingOn22WithNoRE",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "TestDicomMismatch",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.TestDicomMismatch",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "RegistrationHighRes",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.RegistrationHighRes",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
             "name": "TransformUsingMetadata",
             "request": "launch",
             "mainClass": "io.github.rocsg.fijiyama.gargeetest.TransformUsingMetadata",
@@ -23,7 +318,8 @@
             "name": "RegistrationAutomate",
             "request": "launch",
             "mainClass": "io.github.rocsg.fijiyama.gargeetest.RegistrationAutomate",
-            "projectName": "fijiyama"
+            "projectName": "fijiyama",
+            "vmArgs": "-Xmx32g"
         },
         {
             "type": "java",
