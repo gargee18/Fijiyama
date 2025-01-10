@@ -4,23 +4,32 @@ import java.util.List;
 import ij.ImageJ;
 
 import io.github.rocsg.fijiyama.gargeetest.cuttings.core.Specimen;
+import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Step_0_Normalize;
+import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Step_1_InocAlignment;
 import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Step_2_Subsample;
+import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Step_3_RegistrationRigid;
+import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Step_4_Hyperstack;
 import io.github.rocsg.fijiyama.gargeetest.cuttings.core.Pipeline;
 import io.github.rocsg.fijiyama.gargeetest.cuttings.core.PipelineStep;
 
 
 public class MainController {
 
-     public static void main(String[] args) {
+     public static void main(String[] args) throws Exception {
         ImageJ ij=new ImageJ();
         test();
 //        run();
     }
 
     
-    public static void test(){
-        List<Specimen> specimens = loadPCHSpecimens();
-        for(Specimen s:specimens)System.out.println(s);
+    public static void test() throws Exception{
+        // List<Specimen> specimens = loadPCHSpecimens();
+       
+        // for(Specimen s:specimens)System.out.println(s);
+        Specimen spec= new Specimen("B_201");
+        List<PipelineStep> steps = getStepsForDevPipeline();
+        Pipeline pipeline = new Pipeline(steps);
+        pipeline.run(spec);
     }
 
 
@@ -54,17 +63,20 @@ public class MainController {
      */
     public static ArrayList<PipelineStep>getStepsForFullPipeline(){
         ArrayList<PipelineStep> steps = new ArrayList<PipelineStep>();
+        steps.add(new Step_0_Normalize());
+        steps.add(new Step_1_InocAlignment());
         steps.add(new Step_2_Subsample());
-        //steps.add(new NormalizingStep());
-        // Add other steps as needed
+        steps.add(new Step_3_RegistrationRigid());
+        steps.add(new Step_4_Hyperstack());
+        //steps.add(new Step_5_AtlasBuilding());
         return steps;
     }
 
     public static ArrayList<PipelineStep>getStepsForDevPipeline(){
         ArrayList<PipelineStep> steps = new ArrayList<PipelineStep>();
-        // steps.add(new Step_2_RegistrationRigid());
-        //steps.add(new NormalizingStep());
-        // Add other steps as needed
+        steps.add(new Step_3_RegistrationRigid());
+        steps.add(new Step_4_Hyperstack());
+
         return steps;
     }
 

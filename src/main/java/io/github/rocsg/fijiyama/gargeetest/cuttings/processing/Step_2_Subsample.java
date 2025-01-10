@@ -27,19 +27,28 @@ public class Step_2_Subsample implements PipelineStep {
     public Step_2_Subsample(){
         subsampleRatioStandard=2;
     }
+    public static void main(String[] args) throws Exception{
+        Specimen spec= new Specimen("B_201");
+        new Step_2_Subsample().execute(spec,true); 
+    }
+
+    @Override
+    public void execute(Specimen specimen) throws Exception {
+        execute(specimen,true);
+    }
 
     public void execute(Specimen specimen,boolean testing) throws Exception {
-        String[]days=Config.timestamps;
-        for(String day : days){
-            // Open the images
-            String pathToInputImage=specimen.getSpecimenDirectory()+"raw/"+specimen.getName()+"_"+day+".tif";
-            String pathToOutputImage=specimen.getSpecimenDirectory()+"raw_subsampled/"+specimen.getName()+"_"+day+".tif";
+        String[] days=Config.timestamps;
+
+        int N=days.length;
+        for(int i=0;i<N;i++){
 
             //Open input image
-            ImagePlus image=IJ.openImage(pathToInputImage);
+            ImagePlus image=IJ.openImage(Config.getPathToRawImage(specimen, i));
             int X=image.getWidth();
             int Y=image.getHeight();
             int Z=image.getNSlices();
+
             //Resize to 256x256x512 and convert to 8bit
             image = image.resize(X/subsampleRatioStandard, Y/subsampleRatioStandard, Z/subsampleRatioStandard, "bilinear");
             ImageConverter.setDoScaling(true);
@@ -51,8 +60,8 @@ public class Step_2_Subsample implements PipelineStep {
             }
 
             // Save the subsampled image
-            IJ.saveAsTiff(image,pathToOutputImage);
-            System.out.println("Saved subsampled image to: " + pathToOutputImage);
+            IJ.saveAsTiff(image,Config.getPathToSubsampledImage(specimen, i));
+            System.out.println("Saved subsampled image to: " + Config.getPathToSubsampledImage(specimen, i));
             if(testing){
                 VitimageUtils.waitFor(3000);                
                 image.close();
@@ -60,8 +69,5 @@ public class Step_2_Subsample implements PipelineStep {
         }
     }
 
-    @Override
-    public void execute(Specimen specimen) throws Exception {
-        execute(specimen,false);
-    }
+   
 }

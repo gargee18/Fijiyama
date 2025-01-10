@@ -20,6 +20,10 @@ public class Config {
         return mainDir+"Data/01_Raw/"+specimen.getName()+"_"+timestamps[step]+".tif";
     }
 
+    public static String getPathToMask(Specimen specimen, int step){
+        return mainDir+specimen+"Data/05_Mask/"+specimen+"_mask_"+timestamps[step]+".tif";
+    }
+
     // Path to get high res normalized data
     public static String getPathToNormalizedImagesDir(){
         return mainDir+"Data/02_Normalized/";
@@ -40,6 +44,7 @@ public class Config {
         return mainDir+"Data/04_Subsampled/";
     }
 
+
     // Get path to aligned images
     public static String getPathToInocAlignedImage(Specimen specimen, int step) {
         return mainDir+"Data/03_InocAligned/"+specimen.getName()+"_"+timestamps[step]+"_aligned.tif";
@@ -50,17 +55,22 @@ public class Config {
         return mainDir+"Data/04_Subsampled/"+specimen.getName()+"_"+timestamps[step]+"_sub.tif";
     }
 
+
     // Get Transformation Matrix for Inoculation Alignment
     public static String getPathToInoculationAlignmentTransformation(Specimen specimen, int step){
         return mainDir+"Processing/01_InocAlignment/"+specimen.getName()+"_"+timestamps[step]+"_TR_MAT_Inoculation_Alignment.txt";
     }
     
     // Get Transformation Matrix for Rigid Registration
-    public static String getPathToAutomaticRegistrationTransformation(Specimen specimen, int stepRef, int stepMov){
+    public static String getPathToRigidRegistrationMatrix(Specimen specimen, int stepRef, int stepMov){
         return mainDir+"Processing/02_RigidRegistration/"+specimen.getName()+"_"+timestamps[stepRef]+"_"+timestamps[stepMov]+"_TR_MAT_Rigid_Reg.txt";
     }
 
-   
+    //Get hyperstack
+    public static String getPathToHyperstack(Specimen specimen){
+        return mainDir+"Results/01_Hyperstack/"+specimen.getName()+"_Hyperstack.tif";
+    }
+
    
    
    
@@ -197,9 +207,7 @@ public class Config {
         return mainDir+specimen+"/transforms_corrected/Automatic_Transform_3to0.txt";
     }
 
-    public static String getPathToMask(String specimen){
-        return mainDir+specimen+"/raw/"+specimen+"_mask.tif";
-    }
+   
 
     public static String getPathToImageLowRes(String specimen,int step){
         return mainDir+specimen+"/raw_subsampled/"+specimen+"_"+timestamps[step]+"_sub222.tif";

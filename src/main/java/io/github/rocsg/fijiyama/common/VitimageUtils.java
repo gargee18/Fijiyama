@@ -2019,61 +2019,38 @@ public class VitimageUtils {
 
 
 
-	public static ImagePlus actualizeDataMultiThread(ImagePlus source, ImagePlus dest) {
-		int[] dims = VitimageUtils.getDimensions(source);
-		int Z = dims[2];
-		int Y = dims[1];
-		int X = dims[0];
 
-		ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+	// private static Runnable createCopyTask(ImagePlus source, ImagePlus dest, int z, int X, int Y) {
+	// 	return () -> {
+	// 		Object sourcePixels = source.getStack().getProcessor(z + 1).getPixels();
+	// 		Object destPixels = dest.getStack().getProcessor(z + 1).getPixels();
 
-		for (int z = 0; z < Z; z++) {
-			Runnable task = createCopyTask(source, dest, z, X, Y);
-			executor.execute(task);
-		}
-
-		executor.shutdown();
-		try {
-			executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-
-		dest.updateAndDraw();
-		return dest;
-	}
-
-	private static Runnable createCopyTask(ImagePlus source, ImagePlus dest, int z, int X, int Y) {
-		return () -> {
-			Object sourcePixels = source.getStack().getProcessor(z + 1).getPixels();
-			Object destPixels = dest.getStack().getProcessor(z + 1).getPixels();
-
-			switch (source.getType()) {
-				case ImagePlus.GRAY8:
-					byte[] sourceValsByte = (byte[]) sourcePixels;
-					byte[] destValsByte = (byte[]) destPixels;
-					System.arraycopy(sourceValsByte, 0, destValsByte, 0, X * Y);
-					break;
-				case ImagePlus.GRAY16:
-					short[] sourceValsShort = (short[]) sourcePixels;
-					short[] destValsShort = (short[]) destPixels;
-					System.arraycopy(sourceValsShort, 0, destValsShort, 0, X * Y);
-					break;
-				case ImagePlus.GRAY32:
-					float[] sourceValsFloat = (float[]) sourcePixels;
-					float[] destValsFloat = (float[]) destPixels;
-					System.arraycopy(sourceValsFloat, 0, destValsFloat, 0, X * Y);
-					break;
-				case ImagePlus.COLOR_RGB:
-					int[] sourceValsInt = (int[]) sourcePixels;
-					int[] destValsInt = (int[]) destPixels;
-					System.arraycopy(sourceValsInt, 0, destValsInt, 0, X * Y);
-					break;
-				default:
-					throw new IllegalArgumentException("Unsupported image type");
-			}
-		};
-	}
+	// 		switch (source.getType()) {
+	// 			case ImagePlus.GRAY8:
+	// 				byte[] sourceValsByte = (byte[]) sourcePixels;
+	// 				byte[] destValsByte = (byte[]) destPixels;
+	// 				System.arraycopy(sourceValsByte, 0, destValsByte, 0, X * Y);
+	// 				break;
+	// 			case ImagePlus.GRAY16:
+	// 				short[] sourceValsShort = (short[]) sourcePixels;
+	// 				short[] destValsShort = (short[]) destPixels;
+	// 				System.arraycopy(sourceValsShort, 0, destValsShort, 0, X * Y);
+	// 				break;
+	// 			case ImagePlus.GRAY32:
+	// 				float[] sourceValsFloat = (float[]) sourcePixels;
+	// 				float[] destValsFloat = (float[]) destPixels;
+	// 				System.arraycopy(sourceValsFloat, 0, destValsFloat, 0, X * Y);
+	// 				break;
+	// 			case ImagePlus.COLOR_RGB:
+	// 				int[] sourceValsInt = (int[]) sourcePixels;
+	// 				int[] destValsInt = (int[]) destPixels;
+	// 				System.arraycopy(sourceValsInt, 0, destValsInt, 0, X * Y);
+	// 				break;
+	// 			default:
+	// 				throw new IllegalArgumentException("Unsupported image type");
+	// 		}
+	// 	};
+	// }
 
 
 

@@ -123,55 +123,7 @@ public class Step_1_InocAlignment implements PipelineStep{
     public static double[] getInocCoord(String[][] data, Specimen specimen) {
             return extractCoordinates(data, specimen.getName() + "_J001_sub222_inoc");
     }
-
-      // public static ItkTransform debugFunctionForDevelopingXYZ(String specimen){
-
-    //     String filePath = Config.mainDir+"TargetCoordsForAlignment.csv";
-
-    //     // Read the CSV file into a 2D array (String[][])
-    //     String[][] data = VitimageUtils.readStringTabFromCsv(filePath);
-        
-    //     //Step 1 : gather the coordinates and the image
-    //     double[]Pinoc=getInocCoord(data,specimen);
-    //     double[]Ptop=getTopCoord(data,specimen);            
-    //     double[]Pbot=getBotCoord(data,specimen);
-    //     double[]PtargetPinoc=getTargetCoord();
-
-    //     //Step 2 : call the computebasis function and gather the ItkTransform
-    //     ItkTransform trAlignMat = computeBasisChangeAccordingToThreeGivenPoints(Ptop,Pbot,Pinoc,PtargetPinoc);
-    //     // trAlignMat.writeMatrixTransformToFile(Config.getPathtoSaveAlignedTransformationMatrix(specimen));
-    //     System.out.println(trAlignMat);
-
-    //     //Step 3 : apply to the image and display it
-    //     ImagePlus imgTest=IJ.openImage(Config.getPathToImage(specimen,0));
-    //     ImagePlus imgAligned=trAlignMat.transformImage(imgTest,imgTest);
-    //     imgAligned.setTitle(specimen + "_aligned");
-    //     imgAligned.show();
-    //     // IJ.saveAsTiff(imgAligned,Config.getPathToSaveAlignedImage(specimen, 3));
-    //     return trAlignMat;
-
-    // }
-
-    public static void functionThatDoesNotDoAnything(){
-
-        // For each bouture
-
-        //Open the T0 image, and set the slice 512
-
-        //Wait two points from the user
-
-        //Compute the ItkTransform, in order to make these two points designing an horizontal ligne, with y=380, and the center of the line x= 256
-
-        //Save the ItkTransform
-
-
-        // ImagePlus img=null;
-        // img.show();
-        // double[][]pts=VitiDialogs.waitForPointsUI(2, img, true);
-        // ItkTransform.estimateBestRigid3D(null, null);
-        // ItkTransform.writeAsDenseField("");
-
-    }
+ 
 
 }
 

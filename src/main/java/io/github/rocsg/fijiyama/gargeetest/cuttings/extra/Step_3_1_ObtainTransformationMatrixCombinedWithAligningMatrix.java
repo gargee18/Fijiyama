@@ -1,4 +1,4 @@
-package io.github.rocsg.fijiyama.gargeetest.cuttings.processing;
+package io.github.rocsg.fijiyama.gargeetest.cuttings.extra;
 
 import ij.IJ;
 import ij.ImagePlus;
