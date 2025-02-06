@@ -32,8 +32,7 @@ public class Step_4_Hyperstack implements PipelineStep{
         for (int i = 0; i<N; i++){
 
             // raw
-            ImagePlus img= IJ.openImage(Config.getPathToRawImage(specimen,i));
-            img.show();
+            ImagePlus img= IJ.openImage(Config.getPathToNormalizedImage(specimen,i));
             ImagePlus imgTransformed = img;
 
             // open tr and compose
@@ -44,8 +43,10 @@ public class Step_4_Hyperstack implements PipelineStep{
             }
             else{
                 ItkTransform trRigid = ItkTransform.readTransformFromFile(Config.getPathToRigidRegistrationMatrix(specimen, i-1, i));
-                // ItkTransform trInoc = ItkTransform.readTransformFromFile(Config.getPathToInoculationAlignmentTransformation(specimen, 0));
-                // ItkTransform trRigidPlusInoc = trRigid.addTransform(trInoc); 
+                // imgTransformed =trRigid.transformImage(img,imgTransformed);
+                ItkTransform trInocMov = ItkTransform.readTransformFromFile(Config.getPathToInoculationAlignmentTransformation(specimen,i));
+                imgTransformed =trInocMov.transformImage(img,imgTransformed);
+                // ItkTransform trRigidPlusInoc = trInocMov.addTransform(trRigid); 
                 imgTransformed =trRigid.transformImage(img,imgTransformed);
             }    
 
@@ -57,6 +58,7 @@ public class Step_4_Hyperstack implements PipelineStep{
         ImagePlus hyperFrame = VitimageUtils.hyperStackChannelToHyperStackFrame(hyperStackXR);
         hyperFrame.setTitle(specimen+"_Hyperstack");
         hyperFrame.show();
+        hyperFrame.setSlice(512);
         IJ.saveAsTiff(hyperFrame, Config.getPathToHyperstack(specimen));
 
         }

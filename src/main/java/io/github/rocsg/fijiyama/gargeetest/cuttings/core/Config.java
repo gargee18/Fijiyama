@@ -21,7 +21,7 @@ public class Config {
     }
 
     public static String getPathToMask(Specimen specimen, int step){
-        return mainDir+specimen+"Data/05_Mask/"+specimen+"_mask_"+timestamps[step]+".tif";
+        return mainDir+"Data/05_Mask/"+specimen.getName()+"_mask_"+timestamps[step]+".tif";
     }
 
     // Path to get high res normalized data
@@ -70,7 +70,6 @@ public class Config {
     public static String getPathToHyperstack(Specimen specimen){
         return mainDir+"Results/01_Hyperstack/"+specimen.getName()+"_Hyperstack.tif";
     }
-
    
    
    

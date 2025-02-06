@@ -13,11 +13,11 @@ import ij.IJ;
 import ij.ImagePlus;
 
 
-public class Step_1_InocAlignment implements PipelineStep{
+public class Step_2_InocAlignment implements PipelineStep{
 
     public static void main(String[] args) throws Exception{
         Specimen spec= new Specimen("B_201");
-        new Step_1_InocAlignment().execute(spec,true); 
+        new Step_2_InocAlignment().execute(spec,true); 
     }
 
     @Override
@@ -29,16 +29,16 @@ public class Step_1_InocAlignment implements PipelineStep{
         String[] timestamps = Config.timestamps;
         int N = timestamps.length;
 
-        for(int n=0; n< (testing ? 1 : N); n++){
-            String filePath = Config.mainDir+"TargetCoordsForAlignment.csv";
+        for(int n=3; n< 4; n++){
+            String filePath = Config.mainDir+"TargetCoordsForAlignment_"+timestamps[n]+".csv";
 
             // Read the CSV file into a 2D array (String[][])
             String[][] data = VitimageUtils.readStringTabFromCsv(filePath);
             
             //Step 1 : gather the coordinates and the image
-            double[]Pinoc=getInocCoord(data,specimen);
-            double[]Ptop=getTopCoord(data,specimen);            
-            double[]Pbot=getBotCoord(data,specimen);
+            double[]Pinoc=getInocCoord(data,specimen,timestamps[n]);
+            double[]Ptop=getTopCoord(data,specimen,timestamps[n]);            
+            double[]Pbot=getBotCoord(data,specimen,timestamps[n]);
             double[]PtargetPinoc=getTargetCoord();
 
             //Step 2 : call the computebasis function and gather the ItkTransform
@@ -112,16 +112,16 @@ public class Step_1_InocAlignment implements PipelineStep{
         return null;
     }
 
-    public static double[] getTopCoord(String[][] data, Specimen specimen) {
-        return extractCoordinates(data, specimen.getName() + "_J001_sub222_top");
+    public static double[] getTopCoord(String[][] data, Specimen specimen, String timestamp) {
+        return extractCoordinates(data, specimen.getName() + "_"+timestamp+"_sub222_top");
     }
 
-    public static double[] getBotCoord(String[][] data, Specimen specimen) {
-        return extractCoordinates(data, specimen.getName() + "_J001_sub222_bot");
+    public static double[] getBotCoord(String[][] data, Specimen specimen, String timestamp) {
+        return extractCoordinates(data, specimen.getName() + "_"+timestamp+"_sub222_bot");
     }
 
-    public static double[] getInocCoord(String[][] data, Specimen specimen) {
-            return extractCoordinates(data, specimen.getName() + "_J001_sub222_inoc");
+    public static double[] getInocCoord(String[][] data, Specimen specimen, String timestamp) {
+            return extractCoordinates(data, specimen.getName() + "_"+timestamp+"_sub222_inoc");
     }
  
 

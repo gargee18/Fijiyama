@@ -7,6 +7,7 @@ import ij.ImageJ;
 // import ij.ImageJ;
 import ij.ImagePlus;
 import ij.ImageStack;
+import ij.measure.Calibration;
 import ij.process.FloatProcessor;
 import io.github.rocsg.fijiyama.common.VitimageUtils;
 import io.github.rocsg.fijiyama.gargeetest.cuttings.core.Config;
@@ -31,7 +32,6 @@ public class Step_0_Normalize implements PipelineStep{
     public void execute(Specimen specimen,boolean testing) throws Exception {
         String[]timestamps=Config.timestamps;
         int N=timestamps.length;
-
         for(int n=0;n<(testing ? 1 : N);n++){
             ImagePlus imgToGetCapillary = IJ.openImage( Config.getPathToCroppedImage(specimen, n));
             System.out.println( Config.getPathToCroppedImage(specimen, n));
@@ -39,8 +39,8 @@ public class Step_0_Normalize implements PipelineStep{
             System.out.println(Config.getPathToRawImage(specimen, n));
             double capillarySize = 14;// Care : when use with pixel size, divide by 28 (35µm), making 0.5
 
-            // int[] capCentre = VitimageUtils.findCapillaryCenterInSlice(imgToGetCapillary,capillarySize);
-            int[] capCentre = { 410, 139, 243 }; //use when you need to manualy enter the capillary central coordinates
+            int[] capCentre = VitimageUtils.findCapillaryCenterInSlice(imgToGetCapillary,capillarySize);
+            // int[] capCentre = {362,287,430}; //use when you need to manualy enter the capillary central coordinates
             System.out.println("Capillary Centre: " + Arrays.toString(capCentre));
             double[] capValues = VitimageUtils.capillaryValuesAlongZStatic(imgToGetCapillary, capCentre, capillarySize);
 
@@ -50,6 +50,12 @@ public class Step_0_Normalize implements PipelineStep{
             System.out.println("Mean Background: " + offset[0] + " Std: " + offset[1]);
 
             ImagePlus imgNorm = processNormalizationWithRespectToCapillary(imgToNormalize, offset[0], medianCap, 1.0);
+
+            Calibration cal = imgToNormalize.getCalibration();
+            System.out.println(cal.pixelWidth);
+            cal.setUnit("mm");
+            imgNorm.setCalibration(cal);
+
             if(testing)imgNorm.show();
             imgNorm.setDisplayRange(0, Config.max_display_val);
             VitimageUtils.setLutToFire(imgNorm);

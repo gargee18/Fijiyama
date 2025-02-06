@@ -11,6 +11,7 @@ package io.github.rocsg.fijiyama.gargeetest.cuttings.processing;
 import java.util.ArrayList;
 
 import ij.IJ;
+import ij.ImageJ;
 import ij.ImagePlus;
 import ij.plugin.Duplicator;
 import io.github.rocsg.fijiyama.common.VitimageUtils;
@@ -25,6 +26,48 @@ public class Step_5_AtlasBuilding {
     static final int var_MERLOT = 1;
     static final int var_TEMPRA = 2;
     static final int var_UGNI = 3;
+
+    public static void main(String[] args) {
+        
+        ImageJ ij=new ImageJ();
+   //    computeAllHyperStacks();
+       ImagePlus[] atlasCtAllVar = computeAverageAndStdAtDifferentT( cond_CONTROL);
+       atlasCtAllVar[1].setTitle("stdCT");
+       atlasCtAllVar[1].show();
+       atlasCtAllVar[1].setDisplayRange(0, 70);
+       atlasCtAllVar[0].setTitle("meanCT");
+       atlasCtAllVar[0].show();
+       atlasCtAllVar[0].setDisplayRange(0, 70);
+    //    IJ.saveAsTiff( atlasCtAllVar[0]    ,Config.mainDir+"PolarAtlas/mean_all_var_CT_day_77.tif");
+    //    IJ.saveAsTiff( atlasCtAllVar[1]    ,Config.mainDir+"PolarAtlas/std_all_var_CT_day_77.tif");
+       ImagePlus[] atlasPchAllVar = computeAverageAndStdAtDifferentT( cond_PCH);
+       atlasPchAllVar[1].setTitle("stdPCH");
+       atlasPchAllVar[1].show();
+       atlasPchAllVar[1].setDisplayRange(0, 70);
+       atlasPchAllVar[0].setTitle("meanPCH");
+       atlasPchAllVar[0].show();
+       atlasPchAllVar[0].setDisplayRange(0, 70);
+    //    IJ.saveAsTiff( atlasPchAllVar[0]    ,Config.mainDir+"PolarAtlas/mean_all_var_PCH_day_77.tif");
+    //    IJ.saveAsTiff( atlasPchAllVar[1]    ,Config.mainDir+"PolarAtlas/std_all_var_PCH_day_77.tif");
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     /**
      * getSpecimensName:
      * - Retrieves the names of specimen identifiers based on the provided condition and variety.
@@ -75,6 +118,7 @@ public class Step_5_AtlasBuilding {
                     System.out.println("Specimen: " + spec[i] + " Condition: " + cond + " Variety: " + var);
                     ImagePlus img = IJ
                             .openImage(getDirOfSpecimen(spec[i]) + "/hyperimage/" + spec[i] + "_Hyperstack.tif");
+                    
                     // I would like to display if img is null, and then print the argument of
                     // openImage
                     System.out.println("Image: " + img);
@@ -236,7 +280,7 @@ public class Step_5_AtlasBuilding {
                     // openImage
                     System.out.println("Image: " + img);
                     System.out.println(getDirOfSpecimen(spec[i]));
-                    ImagePlus imgT = new Duplicator().run(img, 3, 3, 256, img.getNSlices() - 256, 1, 1);
+                    ImagePlus imgT = new Duplicator().run(img, 1, 1, 256, img.getNSlices() - 256, 3, 3);
                     stacks.add(imgT);
 
                 }
@@ -248,8 +292,8 @@ public class Step_5_AtlasBuilding {
             System.out.println("Image: " + stacks.get(i));
             imgTab[i] = stacks.get(i);
         }
-        ImagePlus[] res = meanAndStdOfImageArrayByteFreshNew(imgTab);
-        // ImagePlus[] res=meanAndStdOfImageArrayFloatFreshNew(imgTab);
+        // ImagePlus[] res = meanAndStdOfImageArrayByteFreshNew(imgTab);
+        ImagePlus[] res=meanAndStdOfImageArrayFloatFreshNew(imgTab);
         return res;
     }
     /**
