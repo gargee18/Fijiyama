@@ -13,7 +13,7 @@ import io.github.rocsg.fijiyama.registration.ItkTransform;
 public class Step_4_Hyperstack implements PipelineStep{
 
     public static void main(String[] args) throws Exception{
-        Specimen spec= new Specimen("B_201");
+        Specimen spec= new Specimen("B_205");
         new Step_4_Hyperstack().execute(spec,true); 
     }
  
@@ -41,14 +41,20 @@ public class Step_4_Hyperstack implements PipelineStep{
                 imgTransformed =trInoc.transformImage(img,imgTransformed);
 
             }
-            else{
-                ItkTransform trRigid = ItkTransform.readTransformFromFile(Config.getPathToRigidRegistrationMatrix(specimen, i-1, i));
-                // imgTransformed =trRigid.transformImage(img,imgTransformed);
-                ItkTransform trInocMov = ItkTransform.readTransformFromFile(Config.getPathToInoculationAlignmentTransformation(specimen,i));
-                imgTransformed =trInocMov.transformImage(img,imgTransformed);
-                // ItkTransform trRigidPlusInoc = trInocMov.addTransform(trRigid); 
-                imgTransformed =trRigid.transformImage(img,imgTransformed);
-            }    
+           
+            else {
+                // Apply the inoculation alignment first
+                ItkTransform trInocMov = ItkTransform.readTransformFromFile(Config.getPathToInoculationAlignmentTransformation(specimen, i));
+                imgTransformed = trInocMov.transformImage(img, imgTransformed);
+        
+                // Apply all previous rigid transformations in order
+                for (int j = 0; j < i; j++) {
+                    ItkTransform trRigid = ItkTransform.readTransformFromFile(Config.getPathToRigidRegistrationMatrix(specimen, j, j + 1));
+                    imgTransformed = trRigid.transformImage(img, imgTransformed);
+                }
+            }
+
+
 
             // save to tab
             tabImgover4setsofdays[i] = imgTransformed;
@@ -60,8 +66,17 @@ public class Step_4_Hyperstack implements PipelineStep{
         hyperFrame.show();
         hyperFrame.setSlice(512);
         IJ.saveAsTiff(hyperFrame, Config.getPathToHyperstack(specimen));
-
+        VitimageUtils.waitFor(5000);
+        hyperFrame.close();
         }
     
 
 }
+
+
+ // else if (i == 1){
+            //     ItkTransform trRigid = ItkTransform.readTransformFromFile(Config.getPathToRigidRegistrationMatrix(specimen, i-1, i));
+            //     ItkTransform trInocMov = ItkTransform.readTransformFromFile(Config.getPathToInoculationAlignmentTransformation(specimen,i));
+            //     imgTransformed =trInocMov.transformImage(img,imgTransformed); 
+            //     imgTransformed =trRigid.transformImage(img,imgTransformed);
+            // }    

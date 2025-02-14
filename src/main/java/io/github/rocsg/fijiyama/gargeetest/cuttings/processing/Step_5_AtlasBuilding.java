@@ -27,42 +27,45 @@ public class Step_5_AtlasBuilding {
     static final int var_TEMPRA = 2;
     static final int var_UGNI = 3;
 
+
+    static final String[] VAR_NAMES = {
+        "var_CHARD", "var_MERLOT", "var_TEMPRA", "var_UGNI"
+    };
+
+    public static String getVarietyName(int value) {
+        if (value >= 0 && value < VAR_NAMES.length) {
+            return VAR_NAMES[value];
+        }
+        return "Unknown";
+    }
+
     public static void main(String[] args) {
         
         ImageJ ij=new ImageJ();
    //    computeAllHyperStacks();
-       ImagePlus[] atlasCtAllVar = computeAverageAndStdAtDifferentT( cond_CONTROL);
-       atlasCtAllVar[1].setTitle("stdCT");
-       atlasCtAllVar[1].show();
-       atlasCtAllVar[1].setDisplayRange(0, 70);
-       atlasCtAllVar[0].setTitle("meanCT");
-       atlasCtAllVar[0].show();
-       atlasCtAllVar[0].setDisplayRange(0, 70);
-    //    IJ.saveAsTiff( atlasCtAllVar[0]    ,Config.mainDir+"PolarAtlas/mean_all_var_CT_day_77.tif");
-    //    IJ.saveAsTiff( atlasCtAllVar[1]    ,Config.mainDir+"PolarAtlas/std_all_var_CT_day_77.tif");
-       ImagePlus[] atlasPchAllVar = computeAverageAndStdAtDifferentT( cond_PCH);
-       atlasPchAllVar[1].setTitle("stdPCH");
-       atlasPchAllVar[1].show();
-       atlasPchAllVar[1].setDisplayRange(0, 70);
-       atlasPchAllVar[0].setTitle("meanPCH");
-       atlasPchAllVar[0].show();
-       atlasPchAllVar[0].setDisplayRange(0, 70);
-    //    IJ.saveAsTiff( atlasPchAllVar[0]    ,Config.mainDir+"PolarAtlas/mean_all_var_PCH_day_77.tif");
-    //    IJ.saveAsTiff( atlasPchAllVar[1]    ,Config.mainDir+"PolarAtlas/std_all_var_PCH_day_77.tif");
+
+    for ( int var = 0; var < 4; var ++){
+            ImagePlus[] atlasCtAllVar = computeAverageAndStdForSpecificVariety( cond_CONTROL, var);
+            atlasCtAllVar[1].setTitle("stdCT");
+            atlasCtAllVar[1].show();
+            atlasCtAllVar[1].setDisplayRange(0, 70);
+            atlasCtAllVar[0].setTitle("meanCT");
+            atlasCtAllVar[0].show();
+            atlasCtAllVar[0].setDisplayRange(0, 70);
+               IJ.saveAsTiff( atlasCtAllVar[0]    ,Config.mainDir+"PolarAtlas/mean_"+getVarietyName(var)+"_CT_day_141.tif");
+               IJ.saveAsTiff( atlasCtAllVar[1]    ,Config.mainDir+"PolarAtlas/std_"+getVarietyName(var)+"_CT_day_141.tif");
+            ImagePlus[] atlasPchAllVar = computeAverageAndStdForSpecificVariety( cond_PCH, var);
+            atlasPchAllVar[1].setTitle("stdPCH");
+            atlasPchAllVar[1].show();
+            atlasPchAllVar[1].setDisplayRange(0, 70);
+            atlasPchAllVar[0].setTitle("meanPCH");
+            atlasPchAllVar[0].show();
+            atlasPchAllVar[0].setDisplayRange(0, 70);
+            IJ.saveAsTiff( atlasPchAllVar[0]    ,Config.mainDir+"PolarAtlas/mean_"+getVarietyName(var)+"_PCH_day_141.tif");
+            IJ.saveAsTiff( atlasPchAllVar[1]    ,Config.mainDir+"PolarAtlas/std_"+getVarietyName(var)+"_PCH_day_141.tif");
+        }
+       
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -230,23 +233,23 @@ public class Step_5_AtlasBuilding {
      *   - `condition`: An integer representing the condition.
      * - Output: An array of two `ImagePlus` objects (mean and standard deviation images).
      */
-    public static ImagePlus[] computeAverageAndStdForSpecificVariety(int condition) {
+    public static ImagePlus[] computeAverageAndStdForSpecificVariety(int condition, int var) {
         ArrayList<ImagePlus> stacks = new ArrayList<ImagePlus>();
         for (int cond = condition; cond <= condition; cond++) {
-            for (int var = 3; var < 4; var++) {
+            // for (int var = 0; var < variety; var++) {
                 String[] spec = getSpecimensName(cond, var);
                 for (int i = 0; i < spec.length; i++) {
                     System.out.println("Specimen: " + spec[i] + " Condition: " + cond + " Variety: " + var);
-                    ImagePlus img = IJ
-                            .openImage(getDirOfSpecimen(spec[i]) + "/hyperimage/" + spec[i] + "_Hyperstack.tif");
+                    // ImagePlus img = IJ.openImage(getDirOfSpecimen(spec[i]) + "/hyperimage/" + spec[i] + "_Hyperstack.tif");
+                    ImagePlus img = IJ.openImage(getDirOfSpecimen(spec[i]) +"/Polar_Transform_Results/GeneralizedPolarTransform.tif");
                     // I would like to display if img is null, and then print the argument of
                     // openImage
                     System.out.println("Image: " + img);
                     System.out.println(getDirOfSpecimen(spec[i]));
-                    ImagePlus imgVar = new Duplicator().run(img, 3, 3, 256, img.getNSlices() - 256, 1, 1);
+                    ImagePlus imgVar = new Duplicator().run(img, 3, 3, 256, img.getNSlices() - 256, 3, 3);
                     stacks.add(imgVar);
 
-                }
+                // }
             }
         }
 
@@ -274,13 +277,13 @@ public class Step_5_AtlasBuilding {
                 String[] spec = getSpecimensName(cond, var);
                 for (int i = 0; i < spec.length; i++) {
                     System.out.println("Specimen: " + spec[i] + " Condition: " + cond + " Variety: " + var);
-                    ImagePlus img = IJ
-                            .openImage(getDirOfSpecimen(spec[i]) + "/hyperimage/" + spec[i] + "_Hyperstack.tif");
+                    // ImagePlus img = IJ.openImage(getDirOfSpecimen(spec[i]) + "/hyperimage/" + spec[i] + "_Hyperstack.tif");
+                    ImagePlus img = IJ.openImage("/home/phukon/Desktop/Cuttings_MRI_registration/"+ spec[i] +"/Polar_Transform_Results/GeneralizedPolarTransform.tif");
                     // I would like to display if img is null, and then print the argument of
                     // openImage
                     System.out.println("Image: " + img);
                     System.out.println(getDirOfSpecimen(spec[i]));
-                    ImagePlus imgT = new Duplicator().run(img, 1, 1, 256, img.getNSlices() - 256, 3, 3);
+                    ImagePlus imgT = new Duplicator().run(img, 1, 1, 256, img.getNSlices() - 256, 0, 0);
                     stacks.add(imgT);
 
                 }

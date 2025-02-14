@@ -19,7 +19,7 @@ public class Step_2_2_CreateMask implements PipelineStep{
 
     public static void main(String[] args) throws Exception {
         ImageJ ij = new ImageJ();
-        Specimen spec = Specimen.getSpecimen("B_201");
+        Specimen spec = Specimen.getSpecimen("B_238");
         System.out.println(spec);
         new Step_2_2_CreateMask().execute(spec);
 
@@ -27,11 +27,13 @@ public class Step_2_2_CreateMask implements PipelineStep{
 
     public void execute(Specimen specimen,boolean testing) throws Exception {
         String[]timestamps=Config.timestamps;
-        int N=timestamps.length;
-        for(int n=0;n<(testing ? 1 : 2);n++){
+        // int N=timestamps.length;
+        for(int n=0;n<1;n++){
         
             // Load reference image
-            String imagePath = Config.getPathToSubsampledImage(specimen, n);
+            // System.out.println(Config.getPathToInocAlignedImageSub(specimen, n));
+            String imagePath = Config.getPathToInocAlignedImageSub(specimen, n);
+
             ImagePlus imgRef = IJ.openImage(imagePath);
 
             // Get connected components
@@ -51,7 +53,7 @@ public class Step_2_2_CreateMask implements PipelineStep{
             ImagePlus pithMask = VitimageUtils.makeOperationBetweenTwoImages(connectedComponents, filledImage, 4, false);
 
             // Define the outer and inner radii for morphological operations  
-            int radiusOutside=25;
+            int radiusOutside=20;
             int radiusInside=15;
 
             // Perform dilation on the pithMask image using a disk-shaped structuring element of radius 'radiusOutside'

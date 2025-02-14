@@ -6,6 +6,55 @@
     "configurations": [
         {
             "type": "java",
+            "name": "TestRegistrationWithMask",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.testing.TestRegistrationWithMask",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "Step_4_Hyperstack",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Step_4_Hyperstack",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "TestBugBM",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.testing.TestBugBM",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "Step_1_Subsample",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Step_1_Subsample",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "SetVoxelSize",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.extra.SetVoxelSize",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "Step_2_InocAlignment",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Step_2_InocAlignment",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "Step_3_RegistrationRigid",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Step_3_RegistrationRigid",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
             "name": "Step_1_InocAlignment",
             "request": "launch",
             "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Step_1_InocAlignment",

@@ -27,7 +27,7 @@ public class MainController {
        // List<Specimen> specimens = loadPCHSpecimens();
       
        // for(Specimen s:specimens)System.out.println(s);
-       Specimen spec= new Specimen("B_201");
+       Specimen spec= new Specimen("B_202");
        List<PipelineStep> steps = getStepsForDevPipeline();
        Pipeline pipeline = new Pipeline(steps);
        pipeline.run(spec);
@@ -37,8 +37,8 @@ public class MainController {
    public static void run(){
        try {
            // Load specimen data
-           List<Specimen> specimens = loadAllSpecimens();
-           //List<Specimen> specimens = loadTestSpecimens();
+        //    List<Specimen> specimens = loadAllSpecimens();
+           List<Specimen> specimens = loadTestSpecimens();
            
 
            // Define the pipeline steps
@@ -75,9 +75,9 @@ public class MainController {
 
    public static ArrayList<PipelineStep>getStepsForDevPipeline(){
        ArrayList<PipelineStep> steps = new ArrayList<PipelineStep>();
-       steps.add(new Step_2_2_CreateMask());
-    //    steps.add(new Step_3_RegistrationRigid());
-    //    steps.add(new Step_4_Hyperstack());
+    //    steps.add(new Step_2_2_CreateMask());
+       steps.add(new Step_3_RegistrationRigid());
+       steps.add(new Step_4_Hyperstack());
        return steps;
    }
 
@@ -113,7 +113,8 @@ public class MainController {
    }
    
    public static  List<Specimen>loadTestSpecimens(){ 
-       List<Specimen> testList=loadAllSpecimens().subList(0, 3);
+    
+       List<Specimen> testList=loadAllSpecimens().subList(18, loadAllSpecimens().size());
        return testList;
    }
 

@@ -16,6 +16,8 @@ import ij.IJ;
 import ij.ImageJ;
 // import ij.ImageJ;
 import ij.ImagePlus;
+import inra.ijpb.morphology.Morphology;
+import io.github.rocsg.fijiyama.common.ItkImagePlusInterface;
 import io.github.rocsg.fijiyama.common.VitimageUtils;
 import io.github.rocsg.fijiyama.fijiyamaplugin.RegistrationAction;
 import io.github.rocsg.fijiyama.gargeetest.cuttings.core.Config;
@@ -30,7 +32,7 @@ import io.github.rocsg.fijiyama.registration.Transform3DType;
 public class Step_3_RegistrationRigid implements PipelineStep{
     public static void main(String[] args) throws Exception{
         ImageJ ij=new ImageJ();
-        Specimen spec= new Specimen("B_201");
+        Specimen spec= new Specimen("B_202");
         new Step_3_RegistrationRigid().execute(spec,true); 
         // seeResultsOfRigidRegistration(spec, 0);
         // seeResultsOfRigidRegistration(spec, 1);
@@ -47,9 +49,9 @@ public class Step_3_RegistrationRigid implements PipelineStep{
     public void execute(Specimen specimen,boolean testing) throws Exception {
         String[] days=Config.timestamps;
         int N=days.length;
-        for(int i=0;i<1;i++){
-            // for(int i=0;i<N-1;i++){
-
+        // BlockMatchingRegistration.setRandomSelection();
+//        ItkImagePlusInterface.setSpeedupOnForFiji();
+        for(int i=0;i<N-1;i++){
             int indexRef=i;
             int indexMov=i+1;
             
@@ -60,7 +62,7 @@ public class Step_3_RegistrationRigid implements PipelineStep{
             ImagePlus imgMovToInoc=null;
             // Get path to mask
             String mask = Config.getPathToMask(specimen, indexRef);
-
+            
             ItkTransform trInocRef= ItkTransform.readTransformFromFile(Config.getPathToInoculationAlignmentTransformation(specimen,indexRef));
             ItkTransform trInocMov= ItkTransform.readTransformFromFile(Config.getPathToInoculationAlignmentTransformation(specimen,indexMov));
             System.out.println(trInocRef);
@@ -72,19 +74,19 @@ public class Step_3_RegistrationRigid implements PipelineStep{
 
             imgRefToInoc.setTitle("Ref");
             imgMovToInoc.setTitle("Mov");
-            ImagePlus imgComp = VitimageUtils.compositeNoAdjustOf(imgRefToInoc, imgMovToInoc, "Composite of aligned images");
+            // ImagePlus imgComp = VitimageUtils.compositeNoAdjustOf(imgRefToInoc, imgMovToInoc, "Composite of aligned images");
    
 
             // Register to get the rigid matrix that align properly both images, but in the inoc space
             ItkTransform trRigid0 = autoLinearRegistrationWithPith(imgRefToInoc, imgMovToInoc, null, specimen, mask,testing);
             trRigid0.writeMatrixTransformToFile(Config.getPathToRigidRegistrationMatrix(specimen,indexRef, indexMov));    
 
-            ImagePlus movRegistered=trRigid0.transformImage(imgRefToInoc, imgMovToInoc);
-            ImagePlus compositefinal =  VitimageUtils.compositeNoAdjustOf(imgRefToInoc, movRegistered, "Composite of registered images");
-            compositefinal.show();
+            // ImagePlus movRegistered=trRigid0.transformImage(imgRefToInoc, imgMovToInoc);
+            // ImagePlus compositefinal =  VitimageUtils.compositeNoAdjustOf(imgRefToInoc, movRegistered, "Composite of registered images");
+            // compositefinal.show();
 
-            VitimageUtils.waitFor(30000);
-            compositefinal.close();
+            // VitimageUtils.waitFor(30000);
+            // compositefinal.close();
 
 
 
@@ -96,17 +98,17 @@ public class Step_3_RegistrationRigid implements PipelineStep{
         RegistrationAction regAct = new RegistrationAction();
         regAct.defineSettingsFromTwoImages(imgRef, imgMov, null, false);
         regAct.typeTrans=Transform3DType.RIGID;
-        regAct.typeAutoDisplay=(2);   
-        // regAct.typeAutoDisplay=(testing ? 2 : 0);   
+        // regAct.typeAutoDisplay=2;   
+        regAct.typeAutoDisplay=(testing ? 2 : 0);   
         regAct.higherAcc=0; 
-        regAct.levelMaxLinear=3;
-        regAct.levelMinLinear=(testing ? 3 : 1);
+        regAct.levelMaxLinear=2;
+        regAct.levelMinLinear=(testing ? 2 : 1);
         regAct.bhsX=3;
         regAct.bhsY=3;
         regAct.bhsZ=3;
-        regAct.strideX=7;
-        regAct.strideY=7;
-        regAct.strideZ=7;
+        regAct.strideX=3;
+        regAct.strideY=3;
+        regAct.strideZ=3;
         regAct.iterationsBMLin=(testing ? 1 : 8);
         regAct.neighX=2;
         regAct.neighX=2;
@@ -114,9 +116,11 @@ public class Step_3_RegistrationRigid implements PipelineStep{
 
         BlockMatchingRegistration bmRegistration = BlockMatchingRegistration.setupBlockMatchingRegistration(imgRef, imgMov, regAct);
         bmRegistration.mask=IJ.openImage(pathToMask);
+        bmRegistration.mask=Morphology.dilation(bmRegistration.mask, inra.ijpb.morphology.strel.DiskStrel.fromRadius(10));
         VitimageUtils.printImageResume(imgRef);
         VitimageUtils.printImageResume(imgMov);
         VitimageUtils.printImageResume(bmRegistration.mask);
+       
         ItkTransform trFinal=bmRegistration.runBlockMatching(null, false);
         bmRegistration.closeLastImages();
         bmRegistration.freeMemory();
