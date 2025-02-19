@@ -10,6 +10,9 @@ import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Step_2_2_CreateMa
 import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Step_2_InocAlignment;
 import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Step_3_RegistrationRigid;
 import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Step_4_Hyperstack;
+import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Step_5_PolarTransform;
+import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Step_6_AtlasBuilding;
+
 import io.github.rocsg.fijiyama.gargeetest.cuttings.core.Pipeline;
 import io.github.rocsg.fijiyama.gargeetest.cuttings.core.PipelineStep;
 
@@ -27,7 +30,7 @@ public class MainController {
        // List<Specimen> specimens = loadPCHSpecimens();
       
        // for(Specimen s:specimens)System.out.println(s);
-       Specimen spec= new Specimen("B_202");
+       Specimen spec= new Specimen("B_201");
        List<PipelineStep> steps = getStepsForDevPipeline();
        Pipeline pipeline = new Pipeline(steps);
        pipeline.run(spec);
@@ -37,8 +40,8 @@ public class MainController {
    public static void run(){
        try {
            // Load specimen data
-        //    List<Specimen> specimens = loadAllSpecimens();
-           List<Specimen> specimens = loadTestSpecimens();
+           List<Specimen> specimens = loadAllSpecimens();
+        //    List<Specimen> specimens = loadTestSpecimens();
            
 
            // Define the pipeline steps
@@ -67,17 +70,17 @@ public class MainController {
        steps.add(new Step_0_Normalize());
        steps.add(new Step_1_Subsample());
        steps.add(new Step_2_InocAlignment());
+       steps.add(new Step_2_2_CreateMask());
        steps.add(new Step_3_RegistrationRigid());
        steps.add(new Step_4_Hyperstack());
-       //steps.add(new Step_5_AtlasBuilding());
+       steps.add(new Step_5_PolarTransform());
+       steps.add(new Step_6_AtlasBuilding());
        return steps;
    }
 
    public static ArrayList<PipelineStep>getStepsForDevPipeline(){
        ArrayList<PipelineStep> steps = new ArrayList<PipelineStep>();
-    //    steps.add(new Step_2_2_CreateMask());
-       steps.add(new Step_3_RegistrationRigid());
-       steps.add(new Step_4_Hyperstack());
+       steps.add(new Step_5_PolarTransform());
        return steps;
    }
 
@@ -114,7 +117,7 @@ public class MainController {
    
    public static  List<Specimen>loadTestSpecimens(){ 
     
-       List<Specimen> testList=loadAllSpecimens().subList(18, loadAllSpecimens().size());
+       List<Specimen> testList=loadAllSpecimens().subList(3, loadAllSpecimens().size());
        return testList;
    }
 

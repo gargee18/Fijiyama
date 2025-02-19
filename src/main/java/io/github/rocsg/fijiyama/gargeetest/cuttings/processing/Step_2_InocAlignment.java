@@ -16,7 +16,7 @@ import ij.ImagePlus;
 public class Step_2_InocAlignment implements PipelineStep{
 
     public static void main(String[] args) throws Exception{
-        Specimen spec= new Specimen("B_201");
+        Specimen spec= new Specimen("B_229");
         new Step_2_InocAlignment().execute(spec,true); 
     }
 

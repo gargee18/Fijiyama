@@ -23,7 +23,7 @@ public class Step_0_Normalize implements PipelineStep{
 
     public static void main(String[] args) throws Exception {
         ImageJ ij = new ImageJ();
-        Specimen spec = Specimen.getSpecimen("B_201");
+        Specimen spec = Specimen.getSpecimen("B_239");
         System.out.println(spec);
         new Step_0_Normalize().execute(spec);
 
@@ -40,7 +40,7 @@ public class Step_0_Normalize implements PipelineStep{
             double capillarySize = 14;// Care : when use with pixel size, divide by 28 (35µm), making 0.5
 
             int[] capCentre = VitimageUtils.findCapillaryCenterInSlice(imgToGetCapillary,capillarySize);
-            // int[] capCentre = {362,287,430}; //use when you need to manualy enter the capillary central coordinates
+            // int[] capCentre = {437,284,785}; //use when you need to manualy enter the capillary central coordinates
             System.out.println("Capillary Centre: " + Arrays.toString(capCentre));
             double[] capValues = VitimageUtils.capillaryValuesAlongZStatic(imgToGetCapillary, capCentre, capillarySize);
 

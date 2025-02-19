@@ -13,7 +13,7 @@ import io.github.rocsg.fijiyama.registration.ItkTransform;
 public class Step_4_Hyperstack implements PipelineStep{
 
     public static void main(String[] args) throws Exception{
-        Specimen spec= new Specimen("B_205");
+        Specimen spec= new Specimen("B_239");
         new Step_4_Hyperstack().execute(spec,true); 
     }
  
@@ -74,9 +74,3 @@ public class Step_4_Hyperstack implements PipelineStep{
 }
 
 
- // else if (i == 1){
-            //     ItkTransform trRigid = ItkTransform.readTransformFromFile(Config.getPathToRigidRegistrationMatrix(specimen, i-1, i));
-            //     ItkTransform trInocMov = ItkTransform.readTransformFromFile(Config.getPathToInoculationAlignmentTransformation(specimen,i));
-            //     imgTransformed =trInocMov.transformImage(img,imgTransformed); 
-            //     imgTransformed =trRigid.transformImage(img,imgTransformed);
-            // }    

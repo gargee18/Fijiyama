@@ -16,8 +16,10 @@ import ij.ImagePlus;
 import ij.plugin.Duplicator;
 import io.github.rocsg.fijiyama.common.VitimageUtils;
 import io.github.rocsg.fijiyama.gargeetest.cuttings.core.Config;
+import io.github.rocsg.fijiyama.gargeetest.cuttings.core.PipelineStep;
+import io.github.rocsg.fijiyama.gargeetest.cuttings.core.Specimen;
 
-public class Step_5_AtlasBuilding {
+public class Step_6_AtlasBuilding implements PipelineStep {
 
     static final int cond_PCH = 0;
     static final int cond_CONTROL = 1;
@@ -39,31 +41,28 @@ public class Step_5_AtlasBuilding {
         return "Unknown";
     }
 
-    public static void main(String[] args) {
-        
-        ImageJ ij=new ImageJ();
-   //    computeAllHyperStacks();
+    @Override
+    public void execute(Specimen specimen) throws Exception {
+        execute(specimen,false);
+    }
 
-    for ( int var = 0; var < 4; var ++){
-            ImagePlus[] atlasCtAllVar = computeAverageAndStdForSpecificVariety( cond_CONTROL, var);
-            atlasCtAllVar[1].setTitle("stdCT");
-            atlasCtAllVar[1].show();
-            atlasCtAllVar[1].setDisplayRange(0, 70);
-            atlasCtAllVar[0].setTitle("meanCT");
-            atlasCtAllVar[0].show();
-            atlasCtAllVar[0].setDisplayRange(0, 70);
-               IJ.saveAsTiff( atlasCtAllVar[0]    ,Config.mainDir+"PolarAtlas/mean_"+getVarietyName(var)+"_CT_day_141.tif");
-               IJ.saveAsTiff( atlasCtAllVar[1]    ,Config.mainDir+"PolarAtlas/std_"+getVarietyName(var)+"_CT_day_141.tif");
-            ImagePlus[] atlasPchAllVar = computeAverageAndStdForSpecificVariety( cond_PCH, var);
-            atlasPchAllVar[1].setTitle("stdPCH");
-            atlasPchAllVar[1].show();
-            atlasPchAllVar[1].setDisplayRange(0, 70);
-            atlasPchAllVar[0].setTitle("meanPCH");
-            atlasPchAllVar[0].show();
-            atlasPchAllVar[0].setDisplayRange(0, 70);
-            IJ.saveAsTiff( atlasPchAllVar[0]    ,Config.mainDir+"PolarAtlas/mean_"+getVarietyName(var)+"_PCH_day_141.tif");
-            IJ.saveAsTiff( atlasPchAllVar[1]    ,Config.mainDir+"PolarAtlas/std_"+getVarietyName(var)+"_PCH_day_141.tif");
-        }
+    public static void main(String[] args) throws Exception {
+
+        Specimen spec= new Specimen("B_202");
+        ImageJ ij=new ImageJ();//Needed for testing
+        new  Step_6_AtlasBuilding().execute(spec,true);
+        System.out.println("Saved!");
+    }
+    
+    public void execute(Specimen specimen,boolean testing) throws Exception {
+        String[] timestamps = Config.timestamps;
+        ImagePlus[] atlasCtAllVar = computeAverageAndStdIndividualAtT3MinusT0( cond_CONTROL);
+        IJ.saveAsTiff( atlasCtAllVar[0]    ,Config.getPathToPolarAtlas()+"/DiffMap/mean_diff_all_var_CT_J141_J001.tif");
+        IJ.saveAsTiff( atlasCtAllVar[1]    ,Config.getPathToPolarAtlas()+"/DiffMap/std_diff_all_var_CT_J141_J001.tif");
+        ImagePlus[] atlasPchAllVar = computeAverageAndStdIndividualAtT3MinusT0( cond_PCH);
+        IJ.saveAsTiff( atlasPchAllVar[0]    ,Config.getPathToPolarAtlas()+"/DiffMap/mean_diff_all_var_PCH_J141_J001.tif");
+        IJ.saveAsTiff( atlasPchAllVar[1]    ,Config.getPathToPolarAtlas()+"/DiffMap/std_diff_all_var_PCH_J141_J001.tif");
+            
        
     }
 
@@ -152,22 +151,19 @@ public class Step_5_AtlasBuilding {
      *   - `condition`: An integer representing the condition.
      * - Output: An array of two `ImagePlus` objects (mean and standard deviation images).
      */
-    public static ImagePlus[] computeAverageAndStdIndividualAtT2MinusT0(int condition) {
+    public static ImagePlus[] computeAverageAndStdIndividualAtT3MinusT0(int condition) {
         ArrayList<ImagePlus> stacks = new ArrayList<ImagePlus>();
         for (int cond = condition; cond <= condition; cond++) {
             for (int var = 0; var < 4; var++) {
                 String[] spec = getSpecimensName(cond, var);
                 for (int i = 0; i < spec.length; i++) {
                     System.out.println("Specimen: " + spec[i] + " Condition: " + cond + " Variety: " + var);
-                    ImagePlus img = IJ
-                            .openImage(getDirOfSpecimen(spec[i]) + "/hyperimage/" + spec[i] + "_Hyperstack.tif");
-                    // I would like to display if img is null, and then print the argument of
-                    // openImage
+                    ImagePlus img = IJ.openImage(Config.mainDir +"/Processing/03_PolarTransform/"+spec[i]+"_GeneralizedPolarTransform.tif");
                     System.out.println("Image: " + img);
                     System.out.println(getDirOfSpecimen(spec[i]));
 
-                    ImagePlus imgT0 = new Duplicator().run(img, 1, 1, 256, img.getNSlices() - 256, 1, 1);
-                    ImagePlus imgT2 = new Duplicator().run(img, 3, 3, 256, img.getNSlices() - 256, 1, 1);
+                    ImagePlus imgT0 = new Duplicator().run(img, 1, 1, 256, img.getNSlices() - 256, 0, 0);
+                    ImagePlus imgT2 = new Duplicator().run(img, 1, 1, 256, img.getNSlices() - 256, 3, 3);
                     img = VitimageUtils.makeOperationBetweenTwoImages(imgT2, imgT0, 4, true);
                     imgT0 = null;
                     imgT2 = null;
@@ -233,20 +229,19 @@ public class Step_5_AtlasBuilding {
      *   - `condition`: An integer representing the condition.
      * - Output: An array of two `ImagePlus` objects (mean and standard deviation images).
      */
-    public static ImagePlus[] computeAverageAndStdForSpecificVariety(int condition, int var) {
+    public static ImagePlus[] computeAverageAndStdForSpecificVariety(int condition, int var,  int step) {
         ArrayList<ImagePlus> stacks = new ArrayList<ImagePlus>();
         for (int cond = condition; cond <= condition; cond++) {
             // for (int var = 0; var < variety; var++) {
                 String[] spec = getSpecimensName(cond, var);
                 for (int i = 0; i < spec.length; i++) {
                     System.out.println("Specimen: " + spec[i] + " Condition: " + cond + " Variety: " + var);
-                    // ImagePlus img = IJ.openImage(getDirOfSpecimen(spec[i]) + "/hyperimage/" + spec[i] + "_Hyperstack.tif");
-                    ImagePlus img = IJ.openImage(getDirOfSpecimen(spec[i]) +"/Polar_Transform_Results/GeneralizedPolarTransform.tif");
+                    ImagePlus img = IJ.openImage(Config.mainDir +"/Processing/03_PolarTransform/"+spec[i]+"_GeneralizedPolarTransform.tif");
                     // I would like to display if img is null, and then print the argument of
                     // openImage
                     System.out.println("Image: " + img);
-                    System.out.println(getDirOfSpecimen(spec[i]));
-                    ImagePlus imgVar = new Duplicator().run(img, 3, 3, 256, img.getNSlices() - 256, 3, 3);
+                    System.out.println(Config.mainDir +"/Processing/03_PolarTransform/"+spec[i]+"_GeneralizedPolarTransform.tif");
+                    ImagePlus imgVar = new Duplicator().run(img, 3, 3, 256, img.getNSlices() - 256, step, step);
                     stacks.add(imgVar);
 
                 // }
@@ -270,24 +265,22 @@ public class Step_5_AtlasBuilding {
      *   - `condition`: An integer representing the condition.
      * - Output: An array of two `ImagePlus` objects (mean and standard deviation images).
      */
-    public static ImagePlus[] computeAverageAndStdAtDifferentT(int condition) {
+    public static ImagePlus[] computeAverageAndStdAtDifferentT(int condition, int var,  int step) {
         ArrayList<ImagePlus> stacks = new ArrayList<ImagePlus>();
         for (int cond = condition; cond <= condition; cond++) {
-            for (int var = 0; var < 4; var++) {
+            // for (int var = 0; var < 4; var++) {
                 String[] spec = getSpecimensName(cond, var);
                 for (int i = 0; i < spec.length; i++) {
                     System.out.println("Specimen: " + spec[i] + " Condition: " + cond + " Variety: " + var);
                     // ImagePlus img = IJ.openImage(getDirOfSpecimen(spec[i]) + "/hyperimage/" + spec[i] + "_Hyperstack.tif");
-                    ImagePlus img = IJ.openImage("/home/phukon/Desktop/Cuttings_MRI_registration/"+ spec[i] +"/Polar_Transform_Results/GeneralizedPolarTransform.tif");
-                    // I would like to display if img is null, and then print the argument of
-                    // openImage
+                    ImagePlus img = IJ.openImage(Config.mainDir +"/Processing/03_PolarTransform/"+spec[i]+"_GeneralizedPolarTransform.tif");
                     System.out.println("Image: " + img);
                     System.out.println(getDirOfSpecimen(spec[i]));
-                    ImagePlus imgT = new Duplicator().run(img, 1, 1, 256, img.getNSlices() - 256, 0, 0);
+                    ImagePlus imgT = new Duplicator().run(img, 1, 1, 256, img.getNSlices() - 256, step, step);
                     stacks.add(imgT);
 
                 }
-            }
+            // }
         }
 
         ImagePlus[] imgTab = new ImagePlus[stacks.size()];
@@ -375,12 +368,5 @@ public class Step_5_AtlasBuilding {
         return new ImagePlus[] { imgMean, imgStd };
     }
 
-
-    // public static void main(String[] args) {
-
-    //     ImageJ ij = new ImageJ();
-    //     ImagePlus[] atlas = computeAverageAndStdForSpecificVariety(1);
-    //     atlas[0].show();
-    // }
-
+    
 }
