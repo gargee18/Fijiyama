@@ -80,8 +80,6 @@ public class Step_6_AtlasBuilding implements PipelineStep {
 
 
 
-
-
     /**
      * getSpecimensName:
      * - Retrieves the names of specimen identifiers based on the provided condition and variety.
