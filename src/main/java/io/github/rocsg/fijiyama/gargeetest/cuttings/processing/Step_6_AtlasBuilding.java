@@ -56,12 +56,24 @@ public class Step_6_AtlasBuilding implements PipelineStep {
     
     public void execute(Specimen specimen,boolean testing) throws Exception {
         String[] timestamps = Config.timestamps;
-        ImagePlus[] atlasCtAllVar = computeAverageAndStdIndividualAtT3MinusT0( cond_CONTROL);
-        IJ.saveAsTiff( atlasCtAllVar[0]    ,Config.getPathToPolarAtlas()+"/DiffMap/mean_diff_all_var_CT_J141_J001.tif");
-        IJ.saveAsTiff( atlasCtAllVar[1]    ,Config.getPathToPolarAtlas()+"/DiffMap/std_diff_all_var_CT_J141_J001.tif");
-        ImagePlus[] atlasPchAllVar = computeAverageAndStdIndividualAtT3MinusT0( cond_PCH);
-        IJ.saveAsTiff( atlasPchAllVar[0]    ,Config.getPathToPolarAtlas()+"/DiffMap/mean_diff_all_var_PCH_J141_J001.tif");
-        IJ.saveAsTiff( atlasPchAllVar[1]    ,Config.getPathToPolarAtlas()+"/DiffMap/std_diff_all_var_PCH_J141_J001.tif");
+        int initialTime = 0; // 0 = J_001
+        int finalTime = 1; // 1 = J_029, 2 = J_077, 3 = J_141 
+        int initTimeFrame = initialTime+1;
+        int finTimeFrame = finalTime+1;
+        ImagePlus[] atlasCtAllVar = computeAverageAndStdIndividualAtT1MinusT0( cond_CONTROL, initTimeFrame, finTimeFrame);
+        atlasCtAllVar[0].setDisplayRange(-0.2,1);
+        VitimageUtils.setLutToFire(atlasCtAllVar[0]);
+        atlasCtAllVar[1].setDisplayRange(-0.2,1);
+        VitimageUtils.setLutToFire(atlasCtAllVar[1]);
+        IJ.saveAsTiff( atlasCtAllVar[0]    ,Config.getPathToPolarAtlas()+"/03_DiffMap/mean_diff_all_var_CT_"+timestamps[finalTime]+"_"+timestamps[initialTime]+".tif");
+        IJ.saveAsTiff( atlasCtAllVar[1]    ,Config.getPathToPolarAtlas()+"/03_DiffMap/std_diff_all_var_CT_"+timestamps[finalTime]+"_"+timestamps[initialTime]+".tif");
+        ImagePlus[] atlasPchAllVar = computeAverageAndStdIndividualAtT1MinusT0( cond_PCH, initTimeFrame, finTimeFrame);
+        atlasPchAllVar[0].setDisplayRange(-0.2,1);
+        VitimageUtils.setLutToFire(atlasPchAllVar[0]);
+        atlasPchAllVar[1].setDisplayRange(-0.2,1);
+        VitimageUtils.setLutToFire(atlasPchAllVar[1]);
+        IJ.saveAsTiff( atlasPchAllVar[0]    ,Config.getPathToPolarAtlas()+"/03_DiffMap/mean_diff_all_var_PCH_"+timestamps[finalTime]+"_"+timestamps[initialTime]+".tif");
+        IJ.saveAsTiff( atlasPchAllVar[1]    ,Config.getPathToPolarAtlas()+"/03_DiffMap/std_diff_all_var_PCH_"+timestamps[finalTime]+"_"+timestamps[initialTime]+".tif");
             
        
     }
@@ -111,26 +123,24 @@ public class Step_6_AtlasBuilding implements PipelineStep {
      */
 
 
-    public static ImagePlus[] computeAverageAndStdIndividualAtT1MinusT0(int condition) {
+    public static ImagePlus[] computeAverageAndStdIndividualAtT1MinusT0(int condition, int initialTime, int finalTime) {
         ArrayList<ImagePlus> stacks = new ArrayList<ImagePlus>();
         for (int cond = condition; cond <= condition; cond++) {
-            for (int var = 0; var < 1; var++) {
+            for (int var = 0; var < 4; var++) {
                 String[] spec = getSpecimensName(cond, var);
                 for (int i = 0; i < spec.length; i++) {
                     System.out.println("Specimen: " + spec[i] + " Condition: " + cond + " Variety: " + var);
-                    ImagePlus img = IJ
-                            .openImage(getDirOfSpecimen(spec[i]) + "/hyperimage/" + spec[i] + "_Hyperstack.tif");
-                    
-                    // I would like to display if img is null, and then print the argument of
+                    ImagePlus img = IJ.openImage(Config.mainDir +"/Processing/03_PolarTransform/"+spec[i]+"_GeneralizedPolarTransform.tif");
                     // openImage
                     System.out.println("Image: " + img);
                     System.out.println(getDirOfSpecimen(spec[i]));
 
-                    ImagePlus imgT0 = new Duplicator().run(img, 1, 1, 256, img.getNSlices() - 256, 1, 1);
-                    ImagePlus imgT1 = new Duplicator().run(img, 2, 2, 256, img.getNSlices() - 256, 1, 1);
-                    img = VitimageUtils.makeOperationBetweenTwoImages(imgT1, imgT0, 4, true);
-                    imgT0 = null;
+                    ImagePlus imgT1 = new Duplicator().run(img, 1, 1, 256, img.getNSlices() - 256, initialTime, initialTime);
+                    ImagePlus imgT2 = new Duplicator().run(img, 1, 1, 256, img.getNSlices() - 256, finalTime, finalTime);
+        
+                    img = VitimageUtils.makeOperationBetweenTwoImages(imgT2, imgT1, 4, true);
                     imgT1 = null;
+                    imgT2 = null;
                     stacks.add(img);
                 }
             }
@@ -163,10 +173,10 @@ public class Step_6_AtlasBuilding implements PipelineStep {
                     System.out.println(getDirOfSpecimen(spec[i]));
 
                     ImagePlus imgT0 = new Duplicator().run(img, 1, 1, 256, img.getNSlices() - 256, 0, 0);
-                    ImagePlus imgT2 = new Duplicator().run(img, 1, 1, 256, img.getNSlices() - 256, 3, 3);
-                    img = VitimageUtils.makeOperationBetweenTwoImages(imgT2, imgT0, 4, true);
+                    ImagePlus imgT3 = new Duplicator().run(img, 1, 1, 256, img.getNSlices() - 256, 3, 3);
+                    img = VitimageUtils.makeOperationBetweenTwoImages(imgT3, imgT0, 4, true);
                     imgT0 = null;
-                    imgT2 = null;
+                    imgT3 = null;
                     stacks.add(img);
                 }
             }
@@ -188,24 +198,21 @@ public class Step_6_AtlasBuilding implements PipelineStep {
      *   - `condition`: An integer representing the condition.
      * - Output: An array of two `ImagePlus` objects (mean and standard deviation images).
      */
-    public static ImagePlus[] computeAverageAndStdIndividualAtT2MinusT1(int condition) {
+    public static ImagePlus[] computeAverageAndStdIndividualAtT2MinusT0(int condition) {
         ArrayList<ImagePlus> stacks = new ArrayList<ImagePlus>();
         for (int cond = condition; cond <= condition; cond++) {
             for (int var = 0; var < 4; var++) {
                 String[] spec = getSpecimensName(cond, var);
                 for (int i = 0; i < spec.length; i++) {
                     System.out.println("Specimen: " + spec[i] + " Condition: " + cond + " Variety: " + var);
-                    ImagePlus img = IJ
-                            .openImage(getDirOfSpecimen(spec[i]) + "/hyperimage/" + spec[i] + "_Hyperstack.tif");
-                    // I would like to display if img is null, and then print the argument of
-                    // openImage
+                    ImagePlus img = IJ.openImage(Config.mainDir +"/Processing/03_PolarTransform/"+spec[i]+"_GeneralizedPolarTransform.tif");
                     System.out.println("Image: " + img);
                     System.out.println(getDirOfSpecimen(spec[i]));
 
-                    ImagePlus imgT1 = new Duplicator().run(img, 2, 2, 256, img.getNSlices() - 256, 1, 1);
-                    ImagePlus imgT2 = new Duplicator().run(img, 3, 3, 256, img.getNSlices() - 256, 1, 1);
-                    img = VitimageUtils.makeOperationBetweenTwoImages(imgT2, imgT1, 4, true);
-                    imgT1 = null;
+                    ImagePlus imgT0 = new Duplicator().run(img, 1, 1, 256, img.getNSlices() - 256, 0, 0);
+                    ImagePlus imgT2 = new Duplicator().run(img, 1, 1, 256, img.getNSlices() - 256, 2    , 2);
+                    img = VitimageUtils.makeOperationBetweenTwoImages(imgT2, imgT0, 4, true);
+                    imgT0 = null;
                     imgT2 = null;
                     stacks.add(img);
                 }
