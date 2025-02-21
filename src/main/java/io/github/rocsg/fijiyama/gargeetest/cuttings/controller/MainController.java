@@ -80,7 +80,7 @@ public class MainController {
 
    public static ArrayList<PipelineStep>getStepsForDevPipeline(){
        ArrayList<PipelineStep> steps = new ArrayList<PipelineStep>();
-       steps.add(new Step_5_PolarTransform());
+       steps.add(new Step_6_AtlasBuilding());
        return steps;
    }
 
