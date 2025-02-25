@@ -56,28 +56,19 @@ public class Step_6_AtlasBuilding implements PipelineStep {
     
     public void execute(Specimen specimen,boolean testing) throws Exception {
         String[] timestamps = Config.timestamps;
-        int initialTime = 0; // 0 = J_001
-        int finalTime = 1; // 1 = J_029, 2 = J_077, 3 = J_141 
-        int initTimeFrame = initialTime+1;
-        int finTimeFrame = finalTime+1;
-        ImagePlus[] atlasCtAllVar = computeAverageAndStdIndividualAtT1MinusT0( cond_CONTROL, initTimeFrame, finTimeFrame);
-        atlasCtAllVar[0].setDisplayRange(-0.2,1);
-        VitimageUtils.setLutToFire(atlasCtAllVar[0]);
-        atlasCtAllVar[1].setDisplayRange(-0.2,1);
-        VitimageUtils.setLutToFire(atlasCtAllVar[1]);
-        IJ.saveAsTiff( atlasCtAllVar[0]    ,Config.getPathToPolarAtlas()+"/03_DiffMap/mean_diff_all_var_CT_"+timestamps[finalTime]+"_"+timestamps[initialTime]+".tif");
-        IJ.saveAsTiff( atlasCtAllVar[1]    ,Config.getPathToPolarAtlas()+"/03_DiffMap/std_diff_all_var_CT_"+timestamps[finalTime]+"_"+timestamps[initialTime]+".tif");
-        ImagePlus[] atlasPchAllVar = computeAverageAndStdIndividualAtT1MinusT0( cond_PCH, initTimeFrame, finTimeFrame);
-        atlasPchAllVar[0].setDisplayRange(-0.2,1);
-        VitimageUtils.setLutToFire(atlasPchAllVar[0]);
-        atlasPchAllVar[1].setDisplayRange(-0.2,1);
-        VitimageUtils.setLutToFire(atlasPchAllVar[1]);
-        IJ.saveAsTiff( atlasPchAllVar[0]    ,Config.getPathToPolarAtlas()+"/03_DiffMap/mean_diff_all_var_PCH_"+timestamps[finalTime]+"_"+timestamps[initialTime]+".tif");
-        IJ.saveAsTiff( atlasPchAllVar[1]    ,Config.getPathToPolarAtlas()+"/03_DiffMap/std_diff_all_var_PCH_"+timestamps[finalTime]+"_"+timestamps[initialTime]+".tif");
-            
-       
+        int t = 4;
+        for (int var = 0; var < 4; var++) {
+            ImagePlus[] atlasCtAllVar = computeAverageAndStdAtDifferentT(cond_CONTROL, var, t);
+            IJ.saveAsTiff( atlasCtAllVar[0]    ,Config.getPathToPolarAtlas()+"/01_FullPop/mean_all_var_CT_"+timestamps[t-1]+".tif");
+            IJ.saveAsTiff( atlasCtAllVar[1]    ,Config.getPathToPolarAtlas()+"/01_FullPop/std_all_var_CT_"+timestamps[t-1]+".tif");
+            ImagePlus[] atlasPchAllVar = computeAverageAndStdAtDifferentT(cond_PCH, var, t);
+            IJ.saveAsTiff( atlasPchAllVar[0]    ,Config.getPathToPolarAtlas()+"/01_FullPop/mean_all_var_PCH_"+timestamps[t-1]+".tif");
+            IJ.saveAsTiff( atlasPchAllVar[1]    ,Config.getPathToPolarAtlas()+"/01_FullPop/std_all_var_PCH_"+timestamps[t-1]+".tif");
+        }
     }
 
+
+   
 
 
     /**
@@ -120,6 +111,29 @@ public class Step_6_AtlasBuilding implements PipelineStep {
      * - Output: An array of two `ImagePlus` objects (mean and standard deviation images).
      */
 
+    public static void computeAndSaveDiffMaps( int initialTime, int finalTime) {
+        String[] timestamps = Config.timestamps;
+        // int initialTime = 0; // 0 = J_001
+        // int finalTime = 1; // 1 = J_029, 2 = J_077, 3 = J_141 
+        int initTimeFrame = initialTime+1;
+        int finTimeFrame = finalTime+1;
+        ImagePlus[] atlasCtAllVar = computeAverageAndStdIndividualAtT1MinusT0( cond_CONTROL, initTimeFrame, finTimeFrame);
+        atlasCtAllVar[0].setDisplayRange(-0.2,1);
+        VitimageUtils.setLutToFire(atlasCtAllVar[0]);
+        atlasCtAllVar[1].setDisplayRange(-0.2,1);
+        VitimageUtils.setLutToFire(atlasCtAllVar[1]);
+        IJ.saveAsTiff( atlasCtAllVar[0]    ,Config.getPathToPolarAtlas()+"/03_DiffMap/mean_diff_all_var_CT_"+timestamps[finalTime]+"_"+timestamps[initialTime]+".tif");
+        IJ.saveAsTiff( atlasCtAllVar[1]    ,Config.getPathToPolarAtlas()+"/03_DiffMap/std_diff_all_var_CT_"+timestamps[finalTime]+"_"+timestamps[initialTime]+".tif");
+        ImagePlus[] atlasPchAllVar = computeAverageAndStdIndividualAtT1MinusT0( cond_PCH, initTimeFrame, finTimeFrame);
+        atlasPchAllVar[0].setDisplayRange(-0.2,1);
+        VitimageUtils.setLutToFire(atlasPchAllVar[0]);
+        atlasPchAllVar[1].setDisplayRange(-0.2,1);
+        VitimageUtils.setLutToFire(atlasPchAllVar[1]);
+        IJ.saveAsTiff( atlasPchAllVar[0]    ,Config.getPathToPolarAtlas()+"/03_DiffMap/mean_diff_all_var_PCH_"+timestamps[finalTime]+"_"+timestamps[initialTime]+".tif");
+        IJ.saveAsTiff( atlasPchAllVar[1]    ,Config.getPathToPolarAtlas()+"/03_DiffMap/std_diff_all_var_PCH_"+timestamps[finalTime]+"_"+timestamps[initialTime]+".tif");
+        
+    }
+
 
     public static ImagePlus[] computeAverageAndStdIndividualAtT1MinusT0(int condition, int initialTime, int finalTime) {
         ArrayList<ImagePlus> stacks = new ArrayList<ImagePlus>();
@@ -152,6 +166,8 @@ public class Step_6_AtlasBuilding implements PipelineStep {
         ImagePlus[] res = meanAndStdOfImageArrayFloatFreshNew(imgTab);
         return res;
     }
+
+
     /**
      * computeAverageAndStdIndividualAtT2MinusT0:
      * - Similar to `computeAverageAndStdIndividualAtT1MinusT0`, but processes T2-T0 images.
@@ -234,6 +250,19 @@ public class Step_6_AtlasBuilding implements PipelineStep {
      *   - `condition`: An integer representing the condition.
      * - Output: An array of two `ImagePlus` objects (mean and standard deviation images).
      */
+
+     public static void computeAndSaveSpecificVariety(){
+        String[] timestamps = Config.timestamps;
+
+        for (int t = 1; t < 5; t++) {
+            ImagePlus[] atlasCtAllSpecVar = computeAverageAndStdForSpecificVariety(cond_CONTROL, var_UGNI, t);
+            IJ.saveAsTiff( atlasCtAllSpecVar[0]    ,Config.getPathToPolarAtlas()+"/02_SpecificVariety/mean_var_UGNI_CT_"+timestamps[t-1]+".tif");
+            IJ.saveAsTiff( atlasCtAllSpecVar[1]    ,Config.getPathToPolarAtlas()+"/02_SpecificVariety/std_var_UGNI_CT_"+timestamps[t-1]+".tif");
+            ImagePlus[] atlasPchAllSpecVar = computeAverageAndStdForSpecificVariety(cond_PCH, var_UGNI, t);
+            IJ.saveAsTiff( atlasPchAllSpecVar[0]    ,Config.getPathToPolarAtlas()+"/02_SpecificVariety/mean_var_UGNI_PCH_"+timestamps[t-1]+".tif");
+            IJ.saveAsTiff( atlasPchAllSpecVar[1]    ,Config.getPathToPolarAtlas()+"/02_SpecificVariety/std_var_UGNI_PCH_"+timestamps[t-1]+".tif");
+        }
+    }
     public static ImagePlus[] computeAverageAndStdForSpecificVariety(int condition, int var,  int step) {
         ArrayList<ImagePlus> stacks = new ArrayList<ImagePlus>();
         for (int cond = condition; cond <= condition; cond++) {
@@ -270,6 +299,8 @@ public class Step_6_AtlasBuilding implements PipelineStep {
      *   - `condition`: An integer representing the condition.
      * - Output: An array of two `ImagePlus` objects (mean and standard deviation images).
      */
+
+    
     public static ImagePlus[] computeAverageAndStdAtDifferentT(int condition, int var,  int step) {
         ArrayList<ImagePlus> stacks = new ArrayList<ImagePlus>();
         for (int cond = condition; cond <= condition; cond++) {

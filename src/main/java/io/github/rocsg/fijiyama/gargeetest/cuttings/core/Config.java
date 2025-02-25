@@ -9,8 +9,8 @@ public class Config {
    
     // Base directory for this project
     // public final static String mainDir = "/mnt/41d6c007-0c9e-41e2-b2eb-8d9c032e9e53/gargee/Cuttings_MRI_registration/";
-    public final static String mainDir = "/mnt/41d6c007-0c9e-41e2-b2eb-8d9c032e9e53/gargee/Cuttings/"; //If phenodrone
-    // public final static String mainDir = "/home/phukon/Desktop/Cuttings/"; //if local
+    // public final static String mainDir = "/mnt/41d6c007-0c9e-41e2-b2eb-8d9c032e9e53/gargee/Cuttings/"; //If phenodrone
+    public final static String mainDir = "/home/phukon/Desktop/Cuttings/"; //if local
 
     // Path to get high res raw data
     public static String getPathToRawImageDir() {
