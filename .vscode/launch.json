@@ -6,6 +6,20 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Step_6_AtlasBuilding",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Step_6_AtlasBuilding",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "EvaluateRegistration",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.testing.EvaluateRegistration",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
             "name": "TestRegistrationWithMask",
             "request": "launch",
             "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.testing.TestRegistrationWithMask",
