@@ -57,14 +57,17 @@ public class Step_6_AtlasBuilding implements PipelineStep {
     public void execute(Specimen specimen,boolean testing) throws Exception {
         String[] timestamps = Config.timestamps;
         int t = 4;
-        for (int var = 0; var < 4; var++) {
-            ImagePlus[] atlasCtAllVar = computeAverageAndStdAtDifferentT(cond_CONTROL, var, t);
-            IJ.saveAsTiff( atlasCtAllVar[0]    ,Config.getPathToPolarAtlas()+"/01_FullPop/mean_all_var_CT_"+timestamps[t-1]+".tif");
-            IJ.saveAsTiff( atlasCtAllVar[1]    ,Config.getPathToPolarAtlas()+"/01_FullPop/std_all_var_CT_"+timestamps[t-1]+".tif");
-            ImagePlus[] atlasPchAllVar = computeAverageAndStdAtDifferentT(cond_PCH, var, t);
-            IJ.saveAsTiff( atlasPchAllVar[0]    ,Config.getPathToPolarAtlas()+"/01_FullPop/mean_all_var_PCH_"+timestamps[t-1]+".tif");
-            IJ.saveAsTiff( atlasPchAllVar[1]    ,Config.getPathToPolarAtlas()+"/01_FullPop/std_all_var_PCH_"+timestamps[t-1]+".tif");
-        }
+        // for (int var = 0; var < 4; var++) {
+        //     ImagePlus[] atlasCtAllVar = computeAverageAndStdAtDifferentT(cond_CONTROL, var, t);
+        //     IJ.saveAsTiff( atlasCtAllVar[0]    ,Config.getPathToPolarAtlas()+"/01_FullPop/mean_all_var_CT_"+timestamps[t-1]+".tif");
+        //     IJ.saveAsTiff( atlasCtAllVar[1]    ,Config.getPathToPolarAtlas()+"/01_FullPop/std_all_var_CT_"+timestamps[t-1]+".tif");
+        //     ImagePlus[] atlasPchAllVar = computeAverageAndStdAtDifferentT(cond_PCH, var, t);
+        //     IJ.saveAsTiff( atlasPchAllVar[0]    ,Config.getPathToPolarAtlas()+"/01_FullPop/mean_all_var_PCH_"+timestamps[t-1]+".tif");
+        //     IJ.saveAsTiff( atlasPchAllVar[1]    ,Config.getPathToPolarAtlas()+"/01_FullPop/std_all_var_PCH_"+timestamps[t-1]+".tif");
+        // }
+        computeAndSaveDiffMaps(0, 1);
+        computeAndSaveDiffMaps(0, 2);
+        computeAndSaveDiffMaps(0, 3);
     }
 
 
@@ -122,15 +125,15 @@ public class Step_6_AtlasBuilding implements PipelineStep {
         VitimageUtils.setLutToFire(atlasCtAllVar[0]);
         atlasCtAllVar[1].setDisplayRange(-0.2,1);
         VitimageUtils.setLutToFire(atlasCtAllVar[1]);
-        IJ.saveAsTiff( atlasCtAllVar[0]    ,Config.getPathToPolarAtlas()+"/03_DiffMap/mean_diff_all_var_CT_"+timestamps[finalTime]+"_"+timestamps[initialTime]+".tif");
-        IJ.saveAsTiff( atlasCtAllVar[1]    ,Config.getPathToPolarAtlas()+"/03_DiffMap/std_diff_all_var_CT_"+timestamps[finalTime]+"_"+timestamps[initialTime]+".tif");
+        IJ.saveAsTiff( atlasCtAllVar[0]    ,Config.getPathToPolarAtlas()+"/03_DiffMap/mean_diff_UGNI_CT_"+timestamps[finalTime]+"_"+timestamps[initialTime]+".tif");
+        IJ.saveAsTiff( atlasCtAllVar[1]    ,Config.getPathToPolarAtlas()+"/03_DiffMap/std_diff_UGNI_CT_"+timestamps[finalTime]+"_"+timestamps[initialTime]+".tif");
         ImagePlus[] atlasPchAllVar = computeAverageAndStdIndividualAtT1MinusT0( cond_PCH, initTimeFrame, finTimeFrame);
         atlasPchAllVar[0].setDisplayRange(-0.2,1);
         VitimageUtils.setLutToFire(atlasPchAllVar[0]);
         atlasPchAllVar[1].setDisplayRange(-0.2,1);
         VitimageUtils.setLutToFire(atlasPchAllVar[1]);
-        IJ.saveAsTiff( atlasPchAllVar[0]    ,Config.getPathToPolarAtlas()+"/03_DiffMap/mean_diff_all_var_PCH_"+timestamps[finalTime]+"_"+timestamps[initialTime]+".tif");
-        IJ.saveAsTiff( atlasPchAllVar[1]    ,Config.getPathToPolarAtlas()+"/03_DiffMap/std_diff_all_var_PCH_"+timestamps[finalTime]+"_"+timestamps[initialTime]+".tif");
+        IJ.saveAsTiff( atlasPchAllVar[0]    ,Config.getPathToPolarAtlas()+"/03_DiffMap/mean_diff_UGNI_PCH_"+timestamps[finalTime]+"_"+timestamps[initialTime]+".tif");
+        IJ.saveAsTiff( atlasPchAllVar[1]    ,Config.getPathToPolarAtlas()+"/03_DiffMap/std_diff_UGNI_PCH_"+timestamps[finalTime]+"_"+timestamps[initialTime]+".tif");
         
     }
 
@@ -138,7 +141,7 @@ public class Step_6_AtlasBuilding implements PipelineStep {
     public static ImagePlus[] computeAverageAndStdIndividualAtT1MinusT0(int condition, int initialTime, int finalTime) {
         ArrayList<ImagePlus> stacks = new ArrayList<ImagePlus>();
         for (int cond = condition; cond <= condition; cond++) {
-            for (int var = 0; var < 4; var++) {
+            for (int var = 3; var < 4; var++) {
                 String[] spec = getSpecimensName(cond, var);
                 for (int i = 0; i < spec.length; i++) {
                     System.out.println("Specimen: " + spec[i] + " Condition: " + cond + " Variety: " + var);
