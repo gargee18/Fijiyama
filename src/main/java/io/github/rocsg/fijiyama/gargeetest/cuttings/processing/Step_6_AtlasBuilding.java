@@ -65,15 +65,15 @@ public class Step_6_AtlasBuilding implements PipelineStep {
         VitimageUtils.setLutToFire(atlasCtAllVar[0]);
         atlasCtAllVar[1].setDisplayRange(-0.2,1);
         VitimageUtils.setLutToFire(atlasCtAllVar[1]);
-        IJ.saveAsTiff( atlasCtAllVar[0]    ,Config.getPathToPolarAtlas()+"/03_DiffMap/mean_diff_all_var_CT_"+timestamps[finalTime]+"_"+timestamps[initialTime]+".tif");
-        IJ.saveAsTiff( atlasCtAllVar[1]    ,Config.getPathToPolarAtlas()+"/03_DiffMap/std_diff_all_var_CT_"+timestamps[finalTime]+"_"+timestamps[initialTime]+".tif");
+        IJ.saveAsTiff( atlasCtAllVar[0]    ,Config.getPathToPolarAtlas()+"/03_DiffMap/mean_CHARD_CT_"+timestamps[finalTime]+"_"+timestamps[initialTime]+".tif");
+        IJ.saveAsTiff( atlasCtAllVar[1]    ,Config.getPathToPolarAtlas()+"/03_DiffMap/std_CHARD_CT_"+timestamps[finalTime]+"_"+timestamps[initialTime]+".tif");
         ImagePlus[] atlasPchAllVar = computeAverageAndStdIndividualAtT1MinusT0( cond_PCH, initTimeFrame, finTimeFrame);
         atlasPchAllVar[0].setDisplayRange(-0.2,1);
         VitimageUtils.setLutToFire(atlasPchAllVar[0]);
         atlasPchAllVar[1].setDisplayRange(-0.2,1);
         VitimageUtils.setLutToFire(atlasPchAllVar[1]);
-        IJ.saveAsTiff( atlasPchAllVar[0]    ,Config.getPathToPolarAtlas()+"/03_DiffMap/mean_diff_all_var_PCH_"+timestamps[finalTime]+"_"+timestamps[initialTime]+".tif");
-        IJ.saveAsTiff( atlasPchAllVar[1]    ,Config.getPathToPolarAtlas()+"/03_DiffMap/std_diff_all_var_PCH_"+timestamps[finalTime]+"_"+timestamps[initialTime]+".tif");
+        IJ.saveAsTiff( atlasPchAllVar[0]    ,Config.getPathToPolarAtlas()+"/03_DiffMap/mean_CHARD_PCH_"+timestamps[finalTime]+"_"+timestamps[initialTime]+".tif");
+        IJ.saveAsTiff( atlasPchAllVar[1]    ,Config.getPathToPolarAtlas()+"/03_DiffMap/std_CHARD_PCH_"+timestamps[finalTime]+"_"+timestamps[initialTime]+".tif");
             
        
     }
