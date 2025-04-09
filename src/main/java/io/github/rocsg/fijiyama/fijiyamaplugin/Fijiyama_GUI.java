@@ -1507,9 +1507,11 @@ public class Fijiyama_GUI extends PlugInFrame implements ActionListener {
 							ImagePlus imgMovCurrentState=regManager.getCurrentMovComposedTransform().transformImage(regManager.getCurrentRefImage(),regManager.getCurrentMovImage(),false);
 							imgMovCurrentState.setDisplayRange(regManager.getCurrentMovRange()[0],regManager.getCurrentMovRange()[1]);
 							if(regManager.getCurrentAction().typeManViewer==RegistrationAction.VIEWER_3D) {
+								System.out.println("Toto 1");
 								if(true)System.out.println("Starting viewer 3D in Fijiyama GUI");
 								regManager.start3dManualRegistration(regManager.getCurrentRefImage(),imgMovCurrentState);
 								setRunToolTip(MANUAL3D);
+								System.out.println("Toto 2");
 							}
 							else {
 								regManager.start2dManualRegistration(regManager.getCurrentRefImage(),imgMovCurrentState);

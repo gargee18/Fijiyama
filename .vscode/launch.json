@@ -6,6 +6,24 @@
     "configurations": [
         {
             "type": "java",
+            "name": "testNormGraft",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.testing.testNormGraft",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "TestNoFuckUniverse",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.testing.TestNoFuckUniverse",
+            "projectName": "fijiyama",
+            "vmArgs": "-Djava.library.path=/usr/lib/jni/ -Xmx32g",
+            "env": {
+                "LD_LIBRARY_PATH": "/usr/lib/jni/"
+            }
+        },
+        {
+            "type": "java",
             "name": "Step_6_AtlasBuilding",
             "request": "launch",
             "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Step_6_AtlasBuilding",

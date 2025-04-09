@@ -1738,6 +1738,7 @@ public class RegistrationManager{
  */
 /*Manual registration routines ********************************************************************************************************************/	
 	public void start3dManualRegistration(ImagePlus imgRef,ImagePlus imgMov) {
+		System.out.println("Toto 11");
 		if(true)System.out.println("01 Starting viewer 3D in RegistrationManager");
 		ImagePlus refCopy=VitimageUtils.imageCopy(imgRef);
 		VitimageUtils.adjustContrast3d(refCopy, Fijiyama_GUI.percentileDisplay,Fijiyama_GUI.widthRangeDisplay);

@@ -37,7 +37,7 @@ public class Step_0_Normalize implements PipelineStep{
             System.out.println( Config.getPathToCroppedImage(specimen, n));
             ImagePlus imgToNormalize = IJ.openImage( Config.getPathToRawImage(specimen, n));
             System.out.println(Config.getPathToRawImage(specimen, n));
-            double capillarySize = 14;// Care : when use with pixel size, divide by 28 (35µm), making 0.5
+            double capillarySize = 14;// Care : when use with pixel size, divide by 28 (35µm), making 0.5 (diameter)
 
             int[] capCentre = VitimageUtils.findCapillaryCenterInSlice(imgToGetCapillary,capillarySize);
             // int[] capCentre = {437,284,785}; //use when you need to manualy enter the capillary central coordinates
