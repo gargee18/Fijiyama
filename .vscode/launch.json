@@ -6,6 +6,20 @@
     "configurations": [
         {
             "type": "java",
+            "name": "openImageSeq",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.helpers.openImageSeq",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "openHyperMap",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.testing.openHyperMap",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
             "name": "testNormGraft",
             "request": "launch",
             "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.testing.testNormGraft",

@@ -71,10 +71,13 @@ public class Config {
     public static String getPathToInoculationAlignmentTransformation(Specimen specimen, int step){
         return mainDir+"Processing/01_InocAlignment/"+specimen.getName()+"_"+timestamps[step]+"_TR_MAT_Inoculation_Alignment.txt";
     }
-    
-    // Get Transformation Matrix for Rigid Registration
-    public static String getPathToRigidRegistrationMatrix(Specimen specimen, int stepRef, int stepMov){
-        return mainDir+"Processing/02_RigidRegistration/"+specimen.getName()+"_"+timestamps[stepRef]+"_"+timestamps[stepMov]+"_TR_MAT_Rigid_Reg.txt";
+    // Get Transformation Matrix for Manual Rigid Registration
+    public static String getPathToManualRigidRegistrationMatrix(Specimen specimen, int stepRef, int stepMov){
+        return mainDir+"Processing/02_RigidRegistration/"+specimen.getName()+"_"+timestamps[stepRef]+"_"+timestamps[stepMov]+"_TR_MAT_Rigid_Reg_man.txt";
+    }
+    // Get Transformation Matrix for Auto Rigid Registration
+    public static String getPathToAutoRigidRegistrationMatrix(Specimen specimen, int stepRef, int stepMov){
+        return mainDir+"Processing/02_RigidRegistration/"+specimen.getName()+"_"+timestamps[stepRef]+"_"+timestamps[stepMov]+"_TR_MAT_Rigid_Reg_auto.txt";
     }
 
     //Get Polar Transformed Images Directory

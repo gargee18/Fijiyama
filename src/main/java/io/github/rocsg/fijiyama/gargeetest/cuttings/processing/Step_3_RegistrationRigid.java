@@ -17,15 +17,17 @@ import ij.ImageJ;
 // import ij.ImageJ;
 import ij.ImagePlus;
 import inra.ijpb.morphology.Morphology;
-import io.github.rocsg.fijiyama.common.ItkImagePlusInterface;
 import io.github.rocsg.fijiyama.common.VitimageUtils;
+import io.github.rocsg.fijiyama.fijiyamaplugin.Fijiyama_GUI;
 import io.github.rocsg.fijiyama.fijiyamaplugin.RegistrationAction;
+import io.github.rocsg.fijiyama.fijiyamaplugin.RegistrationManager;
 import io.github.rocsg.fijiyama.gargeetest.cuttings.core.Config;
 import io.github.rocsg.fijiyama.gargeetest.cuttings.core.PipelineStep;
 import io.github.rocsg.fijiyama.gargeetest.cuttings.core.Specimen;
 import io.github.rocsg.fijiyama.registration.BlockMatchingRegistration;
 import io.github.rocsg.fijiyama.registration.ItkTransform;
 import io.github.rocsg.fijiyama.registration.Transform3DType;
+
 
 
 
@@ -72,13 +74,26 @@ public class Step_3_RegistrationRigid implements PipelineStep{
 
             imgRefToInoc.setTitle("Ref");
             imgMovToInoc.setTitle("Mov");   
+            
+            // ImagePlus imgRefhm = openImageSeq.getSquenceFromAHypermap("/home/phukon/Desktop/201_T1_T2/B201_HyperStack.tif", 3, 1);
+            // ImagePlus imgMovhm = openImageSeq.getSquenceFromAHypermap("/home/phukon/Desktop/201_T1_T2/B201_HyperStack.tif", 3, 2);
+            // // Manual register 
+            // ItkTransform trRigid0 = manualLinearRegistration(imgRefhm,imgMovhm,specimen, testing);
+            // trRigid0.writeMatrixTransformToFile(Config.getPathToManualRigidRegistrationMatrix(specimen,indexRef, indexMov));
 
-            // Register to get the rigid matrix that align properly both images, but in the inoc space
-            ItkTransform trRigid0 = autoLinearRegistrationWithPith(imgRefToInoc, imgMovToInoc, null, specimen, mask,testing);
-            trRigid0.writeMatrixTransformToFile(Config.getPathToRigidRegistrationMatrix(specimen,indexRef, indexMov));    
+            // Auto Register to get the rigid matrix that align properly both images, but in the inoc space
+            ItkTransform trRigid1 = autoLinearRegistrationWithPith(imgRefToInoc, imgMovToInoc, null, specimen, mask,testing);
+            trRigid1.writeMatrixTransformToFile(Config.getPathToAutoRigidRegistrationMatrix(specimen,indexRef, indexMov));    
 
 
         }
+    }
+
+    public static ItkTransform manualLinearRegistration(ImagePlus imgRef, ImagePlus imgMov, Specimen specimen, boolean testing){
+        RegistrationManager regManager = new RegistrationManager(new Fijiyama_GUI());
+        regManager.start3dManualRegistration(imgRef,imgMov);
+        ItkTransform tr=regManager.finish3dManualRegistration(); 
+        return tr;		
     }
     
 
@@ -142,8 +157,8 @@ public class Step_3_RegistrationRigid implements PipelineStep{
         imgAfterInocAlign.show();
         imgAfterInocAlign.setTitle("Composite of images after alignment");
        
-        ItkTransform tr=ItkTransform.readTransformFromFile(Config.getPathToRigidRegistrationMatrix(specimen, indexRef, indexMov));
-        System.out.println(Config.getPathToRigidRegistrationMatrix(specimen, indexRef, indexMov));
+        ItkTransform tr=ItkTransform.readTransformFromFile(Config.getPathToAutoRigidRegistrationMatrix(specimen, indexRef, indexMov));
+        System.out.println(Config.getPathToAutoRigidRegistrationMatrix(specimen, indexRef, indexMov));
         // ItkTransform trMov = trInocMov.addTransform(tr); 
         ImagePlus movRegistered=tr.transformImage(imgRefToInoc, imgMovToInoc);
 

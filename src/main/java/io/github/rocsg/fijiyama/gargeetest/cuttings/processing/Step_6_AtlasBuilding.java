@@ -56,20 +56,6 @@ public class Step_6_AtlasBuilding implements PipelineStep {
     
     public void execute(Specimen specimen,boolean testing) throws Exception {
         String[] timestamps = Config.timestamps;
-<<<<<<< HEAD
-        int t = 4;
-        // for (int var = 0; var < 4; var++) {
-        //     ImagePlus[] atlasCtAllVar = computeAverageAndStdAtDifferentT(cond_CONTROL, var, t);
-        //     IJ.saveAsTiff( atlasCtAllVar[0]    ,Config.getPathToPolarAtlas()+"/01_FullPop/mean_all_var_CT_"+timestamps[t-1]+".tif");
-        //     IJ.saveAsTiff( atlasCtAllVar[1]    ,Config.getPathToPolarAtlas()+"/01_FullPop/std_all_var_CT_"+timestamps[t-1]+".tif");
-        //     ImagePlus[] atlasPchAllVar = computeAverageAndStdAtDifferentT(cond_PCH, var, t);
-        //     IJ.saveAsTiff( atlasPchAllVar[0]    ,Config.getPathToPolarAtlas()+"/01_FullPop/mean_all_var_PCH_"+timestamps[t-1]+".tif");
-        //     IJ.saveAsTiff( atlasPchAllVar[1]    ,Config.getPathToPolarAtlas()+"/01_FullPop/std_all_var_PCH_"+timestamps[t-1]+".tif");
-        // }
-        computeAndSaveDiffMaps(0, 1);
-        computeAndSaveDiffMaps(0, 2);
-        computeAndSaveDiffMaps(0, 3);
-=======
         int initialTime = 0; // 0 = J_001
         int finalTime = 1; // 1 = J_029, 2 = J_077, 3 = J_141 
         int initTimeFrame = initialTime+1;
@@ -90,7 +76,6 @@ public class Step_6_AtlasBuilding implements PipelineStep {
         IJ.saveAsTiff( atlasPchAllVar[1]    ,Config.getPathToPolarAtlas()+"/03_DiffMap/std_CHARD_PCH_"+timestamps[finalTime]+"_"+timestamps[initialTime]+".tif");
             
        
->>>>>>> 3c92bee4b34e463c4576c9e9bd06507f5e344b9a
     }
 
 

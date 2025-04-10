@@ -49,7 +49,7 @@ public class Step_4_Hyperstack implements PipelineStep{
         
                 // Apply all previous rigid transformations in order
                 for (int j = 0; j < i; j++) {
-                    ItkTransform trRigid = ItkTransform.readTransformFromFile(Config.getPathToRigidRegistrationMatrix(specimen, j, j + 1));
+                    ItkTransform trRigid = ItkTransform.readTransformFromFile(Config.getPathToAutoRigidRegistrationMatrix(specimen, j, j + 1));
                     imgTransformed = trRigid.transformImage(img, imgTransformed);
                 }
             }
