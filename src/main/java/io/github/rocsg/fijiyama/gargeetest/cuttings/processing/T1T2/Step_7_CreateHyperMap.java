@@ -12,9 +12,7 @@ import io.github.rocsg.fijiyama.gargeetest.cuttings.core.Specimen;
 public class Step_7_CreateHyperMap implements PipelineStep{
     @Override
     public void execute(Specimen specimen) throws Exception {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'execute'");
-
+        execute(specimen,false);
     }
   
     public static void main(String[] args) throws Exception {
@@ -39,7 +37,7 @@ public class Step_7_CreateHyperMap implements PipelineStep{
         ImagePlus[] transformedImages = new ImagePlus[N];
         for(int t = 0; t<N; t++){
             // Load the image at the given timepoint
-            ImagePlus img = IJ.openImage("/home/phukon/Desktop/206_T1_T2/206_"+timestamp[t]+"_hyperMap.tif");
+            ImagePlus img = IJ.openImage(Config.getPathToNormalizedT1T2sequence(specimen, t));
             transformedImages[t] = img;
             System.out.println("Loaded and transformed: " + timestamp[t]);
         }
@@ -50,7 +48,7 @@ public class Step_7_CreateHyperMap implements PipelineStep{
         ImagePlus hyperMap = HyperStackConverter.toHyperStack(hypTemp, 19, 40, 4, "Grayscale");
         // Save the hyperstack
         hyperMap.show();
-        IJ.saveAsTiff(hyperMap,"/mnt/41d6c007-0c9e-41e2-b2eb-8d9c032e9e53/gargee/T1_T2_Specimen_Analysis/results/"+specimen.getName()+"/"+specimen.getName()+"_hypermap_registered.tif" );
+        IJ.saveAsTiff(hyperMap,Config.getPathToHyperMap(specimen));
         return hyperMap;
     }
 

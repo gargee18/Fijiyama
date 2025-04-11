@@ -10,7 +10,8 @@ public class Config {
     // Base directory for this project
     // public final static String mainDir = "/mnt/41d6c007-0c9e-41e2-b2eb-8d9c032e9e53/gargee/Cuttings_MRI_registration/";
     // public final static String mainDir = "/mnt/41d6c007-0c9e-41e2-b2eb-8d9c032e9e53/gargee/Cuttings/"; //If phenodrone
-    public final static String mainDir = "/home/phukon/Desktop/Cuttings/"; //if local
+    // public final static String mainDir = "/home/phukon/Desktop/Cuttings/"; //if local
+    public final static String mainDir = "/mnt/41d6c007-0c9e-41e2-b2eb-8d9c032e9e53/gargee/T1_T2_Specimen_Analysis/"; 
 
     // Path to get high res raw data
     public static String getPathToRawImageDir() {
@@ -95,9 +96,25 @@ public class Config {
         return mainDir+"Results/02_Atlas/PolarAtlas/";
     }
 
-    
+    public static String getRawT1T2sequence(Specimen specimen, int time){
+        return mainDir + "/processing/input/"+specimen.getName()+"_"+timestamps[time]+"_TR2400_TE12.tif";
+    }
+
+    public static String getPathToSerialRegistrationTRMatrix(Specimen specimen, int time){
+        return mainDir+"/processing/serialRegistration/Exported_data/transform_global"+specimen.getName()+"_"+timestamps[time]+"_TR2400_TE12.txt";
+    }
+
+    public static String getPathToRegisteredT1T2sequence(Specimen specimen, int time){
+        return mainDir+"/processing/stacksRegistered/"+specimen.getName()+"_"+timestamps[time]+"_TR2400_TE12_registered.tif";
+    }
+
+    public static String getPathToNormalizedT1T2sequence(Specimen specimen, int time){
+        return mainDir+"/processing/stacksRegistered/"+specimen.getName()+"_"+timestamps[time]+"_TR2400_TE12_registered_normalized_sigma_corrected.tif";
+    }
    
-   
+    public static String getPathToHyperMap(Specimen specimen){
+        return mainDir+"/results/"+specimen.getName()+"_HyperMap.tif";
+    }
    
    
    

@@ -38,7 +38,7 @@ public class Step_6_NormalizeMRIT1T2 implements PipelineStep{
      */
     public static ImagePlus execute(Specimen specimen, boolean testing) throws Exception {
         // Open the image to be normalized
-        ImagePlus imgToNormalize = IJ.openImage("/home/phukon/Desktop/B_223_J029_registered.tif");
+        ImagePlus imgToNormalize = IJ.openImage(Config.getPathToRegisteredT1T2sequence(specimen, 0)); //TODO:set the t
 
         // Get image dimensions and channel count
         int numChannels = imgToNormalize.getNChannels();
@@ -89,7 +89,8 @@ public class Step_6_NormalizeMRIT1T2 implements PipelineStep{
 
         // Perform sigma correction on the normalized image
         imgNormFinal = sigmaCorrectionPostNormalization(imgNormFinal);
-
+        // Save the corrected image as a TIFF file
+        IJ.saveAsTiff(imgNormFinal, Config.getPathToNormalizedT1T2sequence(specimen, 0));
         // Display the final hyperstack
         imgNormFinal.show();
 
@@ -194,8 +195,7 @@ public class Step_6_NormalizeMRIT1T2 implements PipelineStep{
             }
         }
 
-        // Save the corrected image as a TIFF file
-        IJ.saveAsTiff(image, "/mnt/41d6c007-0c9e-41e2-b2eb-8d9c032e9e53/gargee/206_T1_T2/raw_registered_normalized/206_hypermap_sigma_corrected.tif");
+      
         
         // Return the corrected image
         return image;
