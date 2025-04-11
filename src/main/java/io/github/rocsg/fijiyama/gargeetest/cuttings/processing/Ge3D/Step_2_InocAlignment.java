@@ -1,7 +1,7 @@
  //Input :  point 1 is top cutting, point 2 is bottom cutting, point 3 is inoculation point (gathered with ImageJ), given in RealWorldCoordinates (in mm for example)
  //Output : the ItkTransform that can be applied to an image in order to get it resampled, with the inoculation point at the given coordinates (in RWC)
 
-package io.github.rocsg.fijiyama.gargeetest.cuttings.processing;
+package io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D;
 
 import io.github.rocsg.fijiyama.common.VitimageUtils;
 import io.github.rocsg.fijiyama.gargeetest.cuttings.core.Config;

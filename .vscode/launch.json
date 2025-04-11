@@ -6,6 +6,27 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Step_7_CreateHyperMap",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.processing.T1T2.Step_7_CreateHyperMap",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "Step_5_ApplyTrMatrixToAllSequence",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.processing.T1T2.Step_5_ApplyTrMatrixToAllSequence",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "Step_6_NormalizeMRIT1T2",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.processing.T1T2.Step_6_NormalizeMRIT1T2",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
             "name": "openImageSeq",
             "request": "launch",
             "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.helpers.openImageSeq",

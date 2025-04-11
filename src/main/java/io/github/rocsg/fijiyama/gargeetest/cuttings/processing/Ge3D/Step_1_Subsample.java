@@ -8,7 +8,7 @@
  *  Output: Saves the processed (subsampled) images in a separate directory.
  * 
  */
-package io.github.rocsg.fijiyama.gargeetest.cuttings.processing;
+package io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D;
 
 import ij.IJ;
 import ij.ImagePlus;

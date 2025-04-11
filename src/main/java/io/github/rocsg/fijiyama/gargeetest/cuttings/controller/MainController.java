@@ -4,15 +4,14 @@ import java.util.List;
 import ij.ImageJ;
 
 import io.github.rocsg.fijiyama.gargeetest.cuttings.core.Specimen;
-import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Step_0_Normalize;
-import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Step_1_Subsample;
-import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Step_2_2_CreateMask;
-import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Step_2_InocAlignment;
-import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Step_3_RegistrationRigid;
-import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Step_4_Hyperstack;
-import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Step_5_PolarTransform;
-import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Step_6_AtlasBuilding;
-
+import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_0_Normalize;
+import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_1_Subsample;
+import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_2_2_CreateMask;
+import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_2_InocAlignment;
+import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_3_RegistrationRigid;
+import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_4_Hyperstack;
+import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_5_PolarTransform;
+import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_6_AtlasBuilding;
 import io.github.rocsg.fijiyama.gargeetest.cuttings.core.Pipeline;
 import io.github.rocsg.fijiyama.gargeetest.cuttings.core.PipelineStep;
 
