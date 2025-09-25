@@ -6,6 +6,27 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Step_2_2_CreateMask",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_2_2_CreateMask",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "Step_7_ProbabilisticAtlas",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_7_ProbabilisticAtlas",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "Step_6_AtlasBuilding",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_6_AtlasBuilding",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
             "name": "Step_7_CreateHyperMap",
             "request": "launch",
             "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.processing.T1T2.Step_7_CreateHyperMap",

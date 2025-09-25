@@ -11,7 +11,8 @@ import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_2_InocA
 import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_3_RegistrationRigid;
 import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_4_Hyperstack;
 import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_5_PolarTransform;
-import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_6_AtlasBuilding;
+import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_6_MeanIndividual;
+import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_7_ProbabilisticAtlas;
 import io.github.rocsg.fijiyama.gargeetest.cuttings.core.Pipeline;
 import io.github.rocsg.fijiyama.gargeetest.cuttings.core.PipelineStep;
 
@@ -56,7 +57,7 @@ public class MainController {
            }
 
            System.out.println("Pipeline completed!");
-       } catch (Exception e) {
+            } catch (Exception e) {
            e.printStackTrace();
        }
    }
@@ -73,13 +74,14 @@ public class MainController {
        steps.add(new Step_3_RegistrationRigid());
        steps.add(new Step_4_Hyperstack());
        steps.add(new Step_5_PolarTransform());
-       steps.add(new Step_6_AtlasBuilding());
+       steps.add(new Step_6_MeanIndividual());
+       steps.add(new Step_7_ProbabilisticAtlas());
        return steps;
    }
 
    public static ArrayList<PipelineStep>getStepsForDevPipeline(){
        ArrayList<PipelineStep> steps = new ArrayList<PipelineStep>();
-       steps.add(new Step_6_AtlasBuilding());
+       steps.add(new Step_7_ProbabilisticAtlas());
        return steps;
    }
 
