@@ -1,4 +1,5 @@
 package io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D;
+import java.io.File;
 import java.util.ArrayList;
 
 import ij.IJ;
@@ -6,7 +7,7 @@ import ij.ImageJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.plugin.Duplicator;
-import ij.process.AutoThresholder;
+import ij.plugin.LutLoader;
 import ij.process.ByteProcessor;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
@@ -49,31 +50,129 @@ public class Step_7_ProbabilisticAtlas implements PipelineStep {
     }
 
     public void execute(Specimen specimen, boolean testing) throws Exception {
+        int t = 1;
         String[] timestamps = Config.timestamps;
-        String specimenName = specimen.getName();
+
+        ImagePlus atlas_chard = buildProbabilisticAtlas(cond_CONTROL, var_CHARD, t);
+        atlas_chard.show();
+        IJ.saveAsTiff(atlas_chard, Config.mainDir + "Results/05_ProbabilisticAtlas/ProbabilisticAtlas_CHARD_CT_"+timestamps[t-1]+".tif");
+        ImagePlus atlas_mer = buildProbabilisticAtlas(cond_CONTROL, var_MERLOT, t);
+        atlas_mer.show();
+        IJ.saveAsTiff(atlas_mer, Config.mainDir + "Results/05_ProbabilisticAtlas/ProbabilisticAtlas_MER_CT_"+timestamps[t-1]+".tif");
+        ImagePlus atlas_temp = buildProbabilisticAtlas(cond_CONTROL, var_TEMPRA, t);
+        atlas_temp.show();
+        IJ.saveAsTiff(atlas_temp, Config.mainDir + "Results/05_ProbabilisticAtlas/ProbabilisticAtlas_TEMP_CT_"+timestamps[t-1]+".tif");
+        ImagePlus atlas_ug = buildProbabilisticAtlas(cond_CONTROL, var_UGNI, t);
+        atlas_ug.show();
+        IJ.saveAsTiff(atlas_ug, Config.mainDir + "Results/05_ProbabilisticAtlas/ProbabilisticAtlas_UGNI_CT_"+timestamps[t-1]+".tif");
+
+      
         
-        // String path = Config.mainDir + "Processing/03_PolarTransform/" + specimenName + "_GeneralizedPolarTransform.tif";  
-         
-        // for (int t = 1; t < 5; t++) {
-        //     ImagePlus mask = null;
-        //     try {
-        //         // String path = Config.mainDir + "Results/02_Atlas/PolarAtlas/test_fullpop/mean_all_var_PCH_"+timestamps[t-1]+".tif";  
-        //         System.out.println(path);
-        //         mask = getMaskWithConnectedComponents(t, path); 
-        //         String outPath = Config.getPathToMask()+ specimenName + "_" + timestamps[t-1] + "_mask.tif";
-        //         IJ.saveAsTiff(mask, outPath);
-        //     } finally {
-        //         if (mask != null) mask.close();
-        //     }
-        // }
-        ImagePlus img = getMaskUsingWekaSegmentation(cond_PCH, var_CHARD, 4);
-        img.show();
-                
-        System.out.println("done!");
+    // }
+        // ImagePlus atlas = buildProbabilisticAtlasAllVar(cond_CONTROL, t);
+        // atlas.show();
+        // System.out.println(Config.mainDir+"Results/05_ProbabilisticAtlas/ProbabilisticAtlas_allVar_CT_"+timestamps[t-1]+".tif");
+
+        // IJ.saveAsTiff(atlas, Config.mainDir+"Results/05_ProbabilisticAtlas/ProbabilisticAtlas_allVar_CT_"+timestamps[t-1]+".tif");
         
+    }
+   
+    public static ImagePlus buildProbabilisticAtlas(int condition, int variety, int t) {
+        String[] timestamps = Config.timestamps;
+        String[] specimens = Config.getSpecimensName(condition, variety);
+        ImagePlus mask1 = IJ.openImage(Config.mainDir + "Results/03_MaskforPA/" + specimens[0] +"_"+ timestamps[t-1]+"_mask.tif");
+        int h = mask1.getHeight();
+        int w = mask1.getWidth();
+        int d = mask1.getNSlices();
+
+        // accumulate masks
+        ImageStack sumStack = new ImageStack(w, h);
+        for (int i = 0; i < d; i++) {
+            sumStack.addSlice(new FloatProcessor(w, h));
+        }
+
+         // add all masks
+        for (String specimen : specimens) {
+            String path =Config.mainDir + "Results/03_MaskforPA/" + specimen +"_"+ timestamps[t-1]+"_mask.tif";
+            ImagePlus mask = IJ.openImage(path);
+            for (int z = 1; z <= d; z++) {
+                float[] src = (float[]) mask.getStack().getProcessor(z).convertToFloat().getPixels();
+                float[] dst = (float[]) sumStack.getProcessor(z).getPixels();
+                for (int i = 0; i < src.length; i++) {
+                    if (src[i] > 0) dst[i] += 1f; // treat any nonzero as foreground
+                }
+            }
+        }
+
+        // normalize by number of specimens → probability [0,1]
+        int n = specimens.length;
+        for (int z = 1; z <= d; z++) {
+            float[] dst = (float[]) sumStack.getProcessor(z).getPixels();
+            for (int i = 0; i < dst.length; i++) {
+                dst[i] /= n;
+            }
+        }
+
+    return new ImagePlus(getVarietyName(variety) + "_probAtlas_t" + timestamps[t-1], sumStack);
+
+ 
+    }
+
+   public static ImagePlus buildProbabilisticAtlasAllVar(int cond,int t) {
+        String ts = Config.timestamps[t - 1];
+
+        // collect all specimen IDs in PCH across all varieties
+        java.util.List<String> allSpecs = new java.util.ArrayList<>();
+        for (int v = 0; v < VAR_NAMES.length; v++) {
+            for (String s : Config.getSpecimensName(cond, v)) allSpecs.add(s);
+        }
+         // >>> PRINT WHICH SPECIMENS YOU'RE USING <<<
+        System.out.println("[ProbAtlas] Condition=PCH  Timestamp=" + ts);
+        System.out.println("[ProbAtlas] N specimens = " + allSpecs.size());
+        System.out.println("[ProbAtlas] Specimens   = " + String.join(", ", allSpecs));
+        // open first to get size
+        ImagePlus first = IJ.openImage(Config.mainDir + "Results/03_MaskforPA/" + allSpecs.get(0) + "_" + ts + "_mask.tif");
+        int w = first.getWidth(), h = first.getHeight(), d = first.getNSlices();
+
+        // accumulator
+        ImageStack sum = new ImageStack(w, h);
+        for (int z = 0; z < d; z++) sum.addSlice(new FloatProcessor(w, h));
+
+        // add all masks (nonzero → +1)
+        int n = 0;
+        for (String s : allSpecs) {
+            ImagePlus m = IJ.openImage(Config.mainDir + "Results/03_MaskforPA/" + s + "_" + ts + "_mask.tif");
+            for (int z = 1; z <= d; z++) {
+                float[] src = (float[]) m.getStack().getProcessor(z).convertToFloat().getPixels();
+                float[] dst = (float[]) sum.getProcessor(z).getPixels();
+                for (int i = 0; i < src.length; i++) if (src[i] > 0f) dst[i] += 1f;
+            }
+            n++;
+        }
+
+        // normalize to [0,1]
+        for (int z = 1; z <= d; z++) {
+            float[] px = (float[]) sum.getProcessor(z).getPixels();
+            for (int i = 0; i < px.length; i++) px[i] /= (float) n;
+        }
+
+        return new ImagePlus("ProbAtlas_allVar_PCH_" + ts, sum);
     }
     
 
+
+  
+    
+    public static void runWeka(Specimen specimen) {
+        String[] timestamps = Config.timestamps;
+        String specimenName = specimen.getName();
+        System.out.println( Config.mainDir + "Processing/03_PolarTransform/" + specimenName + "_GeneralizedPolarTransform.tif");
+        String path =  Config.mainDir + "Processing/03_PolarTransform/" + specimenName + "_GeneralizedPolarTransform.tif";
+        ImagePlus img = trainWekaToGetMask(path, 3);
+        IJ.saveAsTiff(img, Config.mainDir+ "Results/04_MaskWeka/" + specimenName + "_" + timestamps[3-1] + "_mask.tif");     
+        System.out.println("done!");
+        
+    }
     public static ImagePlus getMaskWithConnectedComponents(int frame, String path) {
         System.out.println(path);
         ImagePlus img = IJ.openImage(path);
@@ -82,9 +181,7 @@ public class Step_7_ProbabilisticAtlas implements PipelineStep {
             img = new Duplicator().run(img, 1, 1, 256, 768, frame, frame);
         } else {
             img = new Duplicator().run(img);
-        }
-
-       
+        }       
         // img.show();
         // Enhance contrast
         IJ.run(img, "Enhance Contrast", "saturated=0.50");
@@ -101,6 +198,27 @@ public class Step_7_ProbabilisticAtlas implements PipelineStep {
         connectedComponents.setDisplayRange(0, 1);
         // connectedComponents.show();
         return connectedComponents;
+    }
+
+
+    public static ImagePlus trainWekaToGetMask(String path, int frame){
+        // String[] spec = Config.getSpecimensName(condition, variety);
+        // ImagePlus hyperframe = IJ.openImage(Config.mainDir + "Processing/03_PolarTransform/" + spec[0] + "_GeneralizedPolarTransform.tif");
+        ImagePlus hyperframe = IJ.openImage(path);
+        ImagePlus img = new Duplicator().run(hyperframe, 1, 1, 256, 768, frame, frame);
+        WekaSegmentation weka = new WekaSegmentation(img);
+        weka.loadClassifier(Config.mainDir +"segment_pch_all_var_t3.model" );
+        ImagePlus proba = weka.applyClassifier(img, 0, true);
+        ImagePlus imgMask=new Duplicator().run(proba,1,1,1,proba.getNSlices(),1,1);
+        imgMask.setDisplayRange(0.5, 0.5);
+        VitimageUtils.convertToGray8(imgMask);
+        IJ.run(imgMask, "Invert", "stack");
+        IJ.run(imgMask, "Fill Holes", "stack");
+        IJ.run(imgMask, "Invert", "stack");
+        IJ.run(imgMask, "Divide...", "value=255 stack");      
+        imgMask.setDisplayRange(0, 1);
+        IJ.run(imgMask,"Median...", "radius=1 stack");
+        return imgMask;
     }
 
     public static ImagePlus getMaskOfPolarTransforms(int condition, int variety){
@@ -264,27 +382,6 @@ public class Step_7_ProbabilisticAtlas implements PipelineStep {
         if (spec == null || spec.length == 0) {
             throw new IllegalStateException("No specimens for condition=" + condition + ", variety=" + variety);
         }
-
-        // // for (int cond = condition; cond <= condition; cond++) {
-        // //     for (int i = 0; i < spec.length; i++) {
-        //         String path = Config.mainDir + "Processing/03_PolarTransform/" + spec[0] + "_GeneralizedPolarTransform.tif";
-        //         System.out.println(path);
-
-        //         ImagePlus img = IJ.openImage(path);
-        //         if (img == null) {
-        //             throw new IllegalStateException("Not Found: " + path);
-        //         }
-        //         int n = img.getNSlices();
-        //         int start = 256;
-        //         int end   = Math.max(start, n - 256);
-
-        //         ImagePlus imgT1 = new Duplicator().run(img, t, t, start, end, t, t);
-
-                // IJ.run(imgT1, "Gaussian Blur...", "sigma=2 stack");
-                // IJ.run(imgT1, "Median...", "radius=1 stack");
-                // imgT1.setDisplayRange(0.00, 1.80);
-                // imgT1.updateAndDraw();
-
                 IJ.setAutoThreshold(imgT1, "Default dark no-reset");
                 double threshold = imgT1.getProcessor().getMinThreshold();
 
@@ -325,4 +422,105 @@ public class Step_7_ProbabilisticAtlas implements PipelineStep {
         return imgMask;
     }
 
+    public static ImagePlus buildWekaTrainingStack(int condition, int variety, int frame) {
+        String[] specimens = Config.getSpecimensName(condition, variety);
+
+        ImageStack out = null;
+
+        for (int i = 0; i < specimens.length; i++) {
+
+            String specimen = specimens[i];
+            String path = Config.mainDir + "Processing/03_PolarTransform/" + specimen + "_GeneralizedPolarTransform.tif";
+
+            IJ.log("Opening: " + path);
+            ImagePlus hyper = IJ.openImage(path);
+            if (hyper == null) {
+                IJ.log("WARNING: couldn't open " + path + " (skipping).");
+                continue;
+            }
+
+            try {
+                // Sanity checks
+                if (frame < 1 || frame > hyper.getNFrames()) {
+                    IJ.log("WARNING: " + specimen + " has only " + hyper.getNFrames() + " frames; requested T=" + frame + " (skipping).");
+                    continue;
+                }
+                if (hyper.getNSlices() < 627) {
+                    IJ.log("WARNING: " + specimen + " has only " + hyper.getNSlices() + " Z-slices; need 627 (skipping).");
+                    continue;
+                }
+
+                // Extract Z=512, T=frame (channel 1); ImageJ indexing is 1-based
+                ImagePlus z512 = new Duplicator().run(hyper, 1, 1, 512, 512, frame, frame);
+                ImagePlus z627 = new Duplicator().run(hyper, 1, 1, 627, 627, frame, frame);
+
+                // Initialize output stack with correct dimensions & type
+                if (out == null) {
+                    out = new ImageStack(z512.getWidth(), z512.getHeight());
+                }
+
+                // Add slices with informative labels
+                ImageProcessor ip512 = z512.getProcessor();
+                ImageProcessor ip627 = z627.getProcessor();
+
+                out.addSlice(specimen + "_Z512_T" + frame, ip512.duplicate());
+                out.addSlice(specimen + "_Z627_T" + frame, ip627.duplicate());
+
+            } finally {
+                hyper.close();
+            }
+        }
+
+        if (out == null || out.getSize() == 0) {
+            IJ.log("No slices were added. Check file paths and indices.");
+            return null;
+        }
+
+        ImagePlus result = new ImagePlus("Weka_TrainStack_T" + frame + "_Z512_627", out);
+        return result;
+    }
+    
+    public static ImagePlus combineStacks(String name, ImagePlus... stacks) {
+        if (stacks == null || stacks.length == 0) return null;
+
+        // Use dimensions of the first stack
+        int w = stacks[0].getWidth();
+        int h = stacks[0].getHeight();
+        ImageStack out = new ImageStack(w, h);
+
+        for (ImagePlus imp : stacks) {
+            if (imp == null) continue;
+            ImageStack s = imp.getStack();
+
+            for (int i = 1; i <= s.getSize(); i++) {
+                ImageProcessor ip = s.getProcessor(i);
+                String label = imp.getTitle() + "_" + s.getSliceLabel(i);
+                out.addSlice(label, ip.duplicate());
+            }
+        }
+
+        return new ImagePlus(name, out);
+    }
+
+   
+
+    
+
 }
+
+ //     ImagePlus atlas_chard = buildProbabilisticAtlas(cond_PCH, var_CHARD, t);
+    //     atlas_chard.show();
+    //     IJ.saveAsTiff(atlas_chard, Config.mainDir + "Results/05_ProbabilisticAtlas/" + specimen.getName() + "_ProbabilisticAtlas_CHARD_PCH_"+timestamps[t-1]+".tif");
+    //     ImagePlus atlas_mer = buildProbabilisticAtlas(cond_PCH, var_MERLOT, t);
+    //     atlas_mer.show();
+    //     IJ.saveAsTiff(atlas_mer, Config.mainDir + "Results/05_ProbabilisticAtlas/" + specimen.getName() + "_ProbabilisticAtlas_MER_PCH_"+timestamps[t-1]+".tif");
+    //     ImagePlus atlas_temp = buildProbabilisticAtlas(cond_PCH, var_TEMPRA, t);
+    //     atlas_temp.show();
+    //     IJ.saveAsTiff(atlas_temp, Config.mainDir + "Results/05_ProbabilisticAtlas/" + specimen.getName() + "_ProbabilisticAtlas_TEMP_PCH_"+timestamps[t-1]+".tif");
+    //     ImagePlus atlas_ug = buildProbabilisticAtlas(cond_PCH, var_UGNI, t);
+    //     atlas_ug.show();
+    //     IJ.saveAsTiff(atlas_ug, Config.mainDir + "Results/05_ProbabilisticAtlas/" + specimen.getName() + "_ProbabilisticAtlas_UGNI_PCH_"+timestamps[t-1]+".tif");
+
+      
+        
+    // }
