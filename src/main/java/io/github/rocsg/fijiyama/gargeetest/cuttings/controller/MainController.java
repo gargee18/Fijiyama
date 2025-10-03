@@ -39,8 +39,8 @@ public class MainController {
    public static void run(){
        try {
            // Load specimen data
-        //    List<Specimen> specimens = loadAllSpecimens();
-           List<Specimen> specimens = loadPCHSpecimens();
+           List<Specimen> specimens = loadAllSpecimens();
+        //    List<Specimen> specimens = loadPCHSpecimens();
         //    List<Specimen> specimens = loadTestSpecimens();
            
 
