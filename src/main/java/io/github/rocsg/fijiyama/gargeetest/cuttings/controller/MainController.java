@@ -13,6 +13,7 @@ import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_4_Hyper
 import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_5_PolarTransform;
 import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_6_MeanIndividual;
 import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_7_ProbabilisticAtlas;
+import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_9_AxisAlignedEllipsoidFit;
 import io.github.rocsg.fijiyama.gargeetest.cuttings.core.Pipeline;
 import io.github.rocsg.fijiyama.gargeetest.cuttings.core.PipelineStep;
 
@@ -20,8 +21,8 @@ import io.github.rocsg.fijiyama.gargeetest.cuttings.core.PipelineStep;
 public class MainController {
 
     public static void main(String[] args) throws Exception {
-       ImageJ ij=new ImageJ();
-      run();
+        ImageJ ij=new ImageJ();
+        run();
    }
 
    
@@ -76,12 +77,13 @@ public class MainController {
        steps.add(new Step_5_PolarTransform());
        steps.add(new Step_6_MeanIndividual());
        steps.add(new Step_7_ProbabilisticAtlas());
+       steps.add(new Step_9_AxisAlignedEllipsoidFit());
        return steps;
    }
 
    public static ArrayList<PipelineStep>getStepsForDevPipeline(){
        ArrayList<PipelineStep> steps = new ArrayList<PipelineStep>();
-       steps.add(new Step_7_ProbabilisticAtlas());
+       steps.add(new Step_9_AxisAlignedEllipsoidFit());
        return steps;
    }
 

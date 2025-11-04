@@ -93,8 +93,13 @@ public class Config {
 
     //Get polar atlas
     public static String getPathToPolarAtlas(){
-        return mainDir+"Results/02_Atlas/PolarAtlas/";
+        return mainDir+"Results/02_MeanIndividual/Polar/";
     }
+
+    public static String getPathToCartesianAtlas(){
+        return mainDir+"Results/02_MeanIndividual/Cartesian/";
+    }
+
 
      public static String getPathToMask(){
         return mainDir+"Results/03_MaskforPA/";

@@ -6,6 +6,41 @@
     "configurations": [
         {
             "type": "java",
+            "name": "TestCartesianVsPolar",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.testing.TestCartesianVsPolar",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "AxisAlignedEllipsoidFit",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.testing.AxisAlignedEllipsoidFit",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "Step_9_AxisAlignedEllipsoidFit",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_9_AxisAlignedEllipsoidFit",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "Step_6_MeanIndividual",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_6_MeanIndividual",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "Step_8_Entropy",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_8_Entropy",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
             "name": "Step_2_2_CreateMask",
             "request": "launch",
             "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_2_2_CreateMask",

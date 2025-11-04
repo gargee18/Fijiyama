@@ -19,6 +19,7 @@ import io.github.rocsg.fijiyama.gargeetest.cuttings.core.Config;
 import io.github.rocsg.fijiyama.gargeetest.cuttings.core.PipelineStep;
 import io.github.rocsg.fijiyama.gargeetest.cuttings.core.Specimen;
 
+
 public class Step_6_MeanIndividual implements PipelineStep {
 
     static final int cond_PCH = 0;
@@ -56,40 +57,22 @@ public class Step_6_MeanIndividual implements PipelineStep {
     
     public void execute(Specimen specimen,boolean testing) throws Exception {
         String[] timestamps = Config.timestamps;
-        int initialTime = 0; // 0 = J_001
-        int finalTime = 1; // 1 = J_029, 2 = J_077, 3 = J_141 
-        int initTimeFrame = initialTime+1;
-        int finTimeFrame = finalTime+1;
-        // ImagePlus[] atlasCtAllVar = computeAverageAndStdIndividualAtT1MinusT0( cond_CONTROL, initTimeFrame, finTimeFrame);
-        // atlasCtAllVar[0].setDisplayRange(-0.2,1);
-        // VitimageUtils.setLutToFire(atlasCtAllVar[0]);
-        // atlasCtAllVar[1].setDisplayRange(-0.2,1);
-        // VitimageUtils.setLutToFire(atlasCtAllVar[1]);
-        // IJ.saveAsTiff( atlasCtAllVar[0]    ,Config.getPathToPolarAtlas()+"/03_DiffMap/mean_CHARD_CT_"+timestamps[finalTime]+"_"+timestamps[initialTime]+".tif");
-        // IJ.saveAsTiff( atlasCtAllVar[1]    ,Config.getPathToPolarAtlas()+"/03_DiffMap/std_CHARD_CT_"+timestamps[finalTime]+"_"+timestamps[initialTime]+".tif");
-        // ImagePlus[] atlasPchAllVar = computeAverageAndStdIndividualAtT1MinusT0( cond_PCH, initTimeFrame, finTimeFrame);
-        // atlasPchAllVar[0].setDisplayRange(-0.2,1);
-        // VitimageUtils.setLutToFire(atlasPchAllVar[0]);
-        // atlasPchAllVar[1].setDisplayRange(-0.2,1);
-        // VitimageUtils.setLutToFire(atlasPchAllVar[1]);
-        // IJ.saveAsTiff( atlasPchAllVar[0]    ,Config.getPathToPolarAtlas()+"/03_DiffMap/mean_CHARD_PCH_"+timestamps[finalTime]+"_"+timestamps[initialTime]+".tif");
-        // IJ.saveAsTiff( atlasPchAllVar[1]    ,Config.getPathToPolarAtlas()+"/03_DiffMap/std_CHARD_PCH_"+timestamps[finalTime]+"_"+timestamps[initialTime]+".tif");
-        // ImagePlus[] allVarCT = computeAverageAndStdAllVar(cond_CONTROL, 4);
-        // allVarCT[0].setDisplayRange(0,1);
-        // VitimageUtils.setLutToFire(allVarCT[0]);
-        // allVarCT[1].setDisplayRange(0.1,1);
-        // VitimageUtils.setLutToFire(allVarCT[1]);
-        // IJ.saveAsTiff( allVarCT[0]    ,Config.getPathToPolarAtlas()+"/test_fullpop/mean_all_var_CT_"+timestamps[3]+".tif");
-        // IJ.saveAsTiff( allVarCT[1]    ,Config.getPathToPolarAtlas()+"/test_fullpop/std_all_var_CT_"+timestamps[3]+".tif");
-        // ImagePlus[] allVarPCH = computeAverageAndStdAllVar(cond_PCH, 4);
-        // allVarPCH[0].setDisplayRange(0,1);
-        // VitimageUtils.setLutToFire(allVarPCH[0]);
-        // allVarPCH[1].setDisplayRange(0,1);
-        // VitimageUtils.setLutToFire(allVarPCH[1]);
-        // IJ.saveAsTiff( allVarPCH[0]    ,Config.getPathToPolarAtlas()+"/test_fullpop/mean_all_var_PCH_"+timestamps[3]+".tif");
-        // IJ.saveAsTiff( allVarPCH[1]    ,Config.getPathToPolarAtlas()+"/test_fullpop/std_all_var_PCH_"+timestamps[3]+".tif");
-
-        computeAndSaveSpecificVariety();
+        
+        int step = 4;
+        ImagePlus[] allVarCT = computeAverageAndStdAllVar(cond_CONTROL, step);
+        allVarCT[0].setDisplayRange(0,1);
+        VitimageUtils.setLutToFire(allVarCT[0]);
+        allVarCT[1].setDisplayRange(0.1,1);
+        VitimageUtils.setLutToFire(allVarCT[1]);
+        IJ.saveAsTiff( allVarCT[0]    ,Config.getPathToCartesianAtlas()+"/01_FullPop/mean_all_var_CT_"+timestamps[step -1]+".tif");
+        IJ.saveAsTiff( allVarCT[1]    ,Config.getPathToCartesianAtlas()+"/01_FullPop/std_all_var_CT_"+timestamps[step -1]+".tif");
+        ImagePlus[] allVarPCH = computeAverageAndStdAllVar(cond_PCH, step);
+        allVarPCH[0].setDisplayRange(0,1);
+        VitimageUtils.setLutToFire(allVarPCH[0]);
+        allVarPCH[1].setDisplayRange(0,1);
+        VitimageUtils.setLutToFire(allVarPCH[1]);
+        IJ.saveAsTiff( allVarPCH[0]    ,Config.getPathToCartesianAtlas()+"/01_FullPop/mean_all_var_PCH_"+timestamps[step -1]+".tif");
+        IJ.saveAsTiff( allVarPCH[1]    ,Config.getPathToCartesianAtlas()+"/01_FullPop/std_all_var_PCH_"+timestamps[step -1]+".tif");
     }
 
 
@@ -373,8 +356,8 @@ public class Step_6_MeanIndividual implements PipelineStep {
                 String[] spec = getSpecimensName(cond, var);
                 for (int i = 0; i < spec.length; i++) {
                     System.out.println("Specimen: " + spec[i] + " Condition: " + cond + " Variety: " + var);
-                    // ImagePlus img = IJ.openImage(getDirOfSpecimen(spec[i]) + "/hyperimage/" + spec[i] + "_Hyperstack.tif");
-                    ImagePlus img = IJ.openImage(Config.mainDir +"/Processing/03_PolarTransform/"+spec[i]+"_GeneralizedPolarTransform.tif");
+                    ImagePlus img = IJ.openImage(Config.mainDir + "Results/01_Hyperstack/" + spec[i] + "_Hyperstack.tif");
+                    // ImagePlus img = IJ.openImage(Config.mainDir +"/Processing/03_PolarTransform/"+spec[i]+"_GeneralizedPolarTransform.tif");
                     System.out.println("Image: " + img);
                     System.out.println(getDirOfSpecimen(spec[i]));
                     ImagePlus imgT = new Duplicator().run(img, 1, 1, 256, img.getNSlices() - 256, step, step);
@@ -470,3 +453,21 @@ public class Step_6_MeanIndividual implements PipelineStep {
 
     
 }
+// int initialTime = 0; // 0 = J_001
+        // int finalTime = 1; // 1 = J_029, 2 = J_077, 3 = J_141 
+        // int initTimeFrame = initialTime+1;
+        // int finTimeFrame = finalTime+1;
+        // ImagePlus[] atlasCtAllVar = computeAverageAndStdIndividualAtT1MinusT0( cond_CONTROL, initTimeFrame, finTimeFrame);
+        // atlasCtAllVar[0].setDisplayRange(-0.2,1);
+        // VitimageUtils.setLutToFire(atlasCtAllVar[0]);
+        // atlasCtAllVar[1].setDisplayRange(-0.2,1);
+        // VitimageUtils.setLutToFire(atlasCtAllVar[1]);
+        // IJ.saveAsTiff( atlasCtAllVar[0]    ,Config.getPathToPolarAtlas()+"/03_DiffMap/mean_CHARD_CT_"+timestamps[finalTime]+"_"+timestamps[initialTime]+".tif");
+        // IJ.saveAsTiff( atlasCtAllVar[1]    ,Config.getPathToPolarAtlas()+"/03_DiffMap/std_CHARD_CT_"+timestamps[finalTime]+"_"+timestamps[initialTime]+".tif");
+        // ImagePlus[] atlasPchAllVar = computeAverageAndStdIndividualAtT1MinusT0( cond_PCH, initTimeFrame, finTimeFrame);
+        // atlasPchAllVar[0].setDisplayRange(-0.2,1);
+        // VitimageUtils.setLutToFire(atlasPchAllVar[0]);
+        // atlasPchAllVar[1].setDisplayRange(-0.2,1);
+        // VitimageUtils.setLutToFire(atlasPchAllVar[1]);
+        // IJ.saveAsTiff( atlasPchAllVar[0]    ,Config.getPathToPolarAtlas()+"/03_DiffMap/mean_CHARD_PCH_"+timestamps[finalTime]+"_"+timestamps[initialTime]+".tif");
+        // IJ.saveAsTiff( atlasPchAllVar[1]    ,Config.getPathToPolarAtlas()+"/03_DiffMap/std_CHARD_PCH_"+timestamps[finalTime]+"_"+timestamps[initialTime]+".tif");
