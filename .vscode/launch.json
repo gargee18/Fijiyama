@@ -6,6 +6,20 @@
     "configurations": [
         {
             "type": "java",
+            "name": "GetVoxelCount",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.testing.GetVoxelCount",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "TestWekaInference",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.testing.TestWekaInference",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
             "name": "TestCartesianVsPolar",
             "request": "launch",
             "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.testing.TestCartesianVsPolar",

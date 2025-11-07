@@ -83,7 +83,7 @@ public class MainController {
 
    public static ArrayList<PipelineStep>getStepsForDevPipeline(){
        ArrayList<PipelineStep> steps = new ArrayList<PipelineStep>();
-       steps.add(new Step_9_AxisAlignedEllipsoidFit());
+       steps.add(new Step_7_ProbabilisticAtlas());
        return steps;
    }
 

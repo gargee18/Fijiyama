@@ -16,8 +16,6 @@ import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
 import ij.ImageStack;
-import ij.process.BinaryProcessor;
-import ij.process.ByteProcessor;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 import java.io.FileWriter;
@@ -33,54 +31,42 @@ import org.apache.commons.math3.linear.*;
 
 public class Step_9_AxisAlignedEllipsoidFit implements PipelineStep{
 
-    // --- Configuration for ImagePlus reading ---
-
     private static final String DEFAULT_PATH =  Config.mainDir + "/Processing/04_Masks/07_MaskSurface3D/B_206_J141_mask_contour.tif";
-    /** Foreground value expected by extractSurfacePoints when using 8-bit masks. 
-     *  If your mask is float 0/1, either convert to 0/255 or change extraction to (getf>0). */
     private static final int FOREGROUND = 255;   
     private static final double SUBSAMPLE = 1.0; 
-
     @Override
     public void execute(Specimen specimen) throws Exception {
         execute(specimen, true);
     }
-
     public static void main(String[] args)throws Exception {
         ImageJ ij=new ImageJ();
         String path = (args.length>0) ? args[0] : DEFAULT_PATH;
         ImagePlus imp = IJ.openImage(path);
         if (imp == null){ System.err.println("Cannot open: "+path); return; }
-        Specimen spec = new Specimen("B_201");
-
+        Specimen spec = new Specimen("B_220");
         new Step_9_AxisAlignedEllipsoidFit().execute(spec,true);
     }
-      
-        
-
     public void execute(Specimen specimen, boolean testing) throws Exception {
         ImagePlus mask = IJ.openImage(DEFAULT_PATH);
         // mask.show();
-        int cx = 160, cy = 100, cz = 256;  
+        int cx = 160, cy = 100, cz = 255;  
         // doBoxes(mask, cx, cy, cz);
         String[] timestamps = Config.timestamps;
         
-        // verifyResults(specimen, mask, timestamps, cx, cy, cz);
+       
         runEllipsoidBatch(specimen, timestamps, cx, cy, cz);
-        
-        
-
-        
+        verifyResults(specimen, mask, timestamps, cx, cy, cz);
     }
-
     public static void verifyResults(Specimen specimen, ImagePlus mask, String[] timestamps, int cx, int cy, int cz){
         SymmetryResult res = buildSymmetricEllipsoids(mask, cx, cy, cz);
 
         ImagePlus res_minus =res.fullFromMinus;
+        res_minus.setTitle("negative_z");
         res_minus.show();
         ImagePlus res_plus =res.fullFromPlus;
+        res_plus.setTitle("positive_z");
         res_plus.show();
-
+        
         Result rm = fitFromImagePlus(res_minus, FOREGROUND, SUBSAMPLE);
         System.out.printf(java.util.Locale.US, "ok=%s note=%s\n", rm.ok, rm.note);
         System.out.printf(java.util.Locale.US, "center_negative_z_ellipsoid = [%.6f, %.6f, %.6f]\n", rm.center[0], rm.center[1], rm.center[2]);
@@ -93,60 +79,92 @@ public class Step_9_AxisAlignedEllipsoidFit implements PipelineStep{
         System.out.printf(java.util.Locale.US, "radii_positive_z_ellipsoid  = [%.6f, %.6f, %.6f]\n", rp.radii[0], rp.radii[1], rp.radii[2]);
         System.out.printf(java.util.Locale.US, "mean residual_positive_z_ellipsoid = %.6g  std = %.6g  (N=%d)\n", rp.meanResidual, rp.stdResidual, rp.nPoints);
 
-        // saveEllipsoidResultsToCSV(specimen, rm, rp, Config.mainDir + "/Results/03_ProbabilisticAtlas/Ellipsoid_fit_results_test.csv");
 
         if (rm.ok) {
                 double pw = res_minus.getCalibration().pixelWidth;  if (pw<=0) pw=1;
                 double ph = res_minus.getCalibration().pixelHeight; if (ph<=0) ph=1;
                 double pd = res_minus.getCalibration().pixelDepth;  if (pd<=0) pd=1;
-                
-                // Generate contour with shell thickness of ~1 pixel
+
+                double[] center_mm_m = new double[]{ rm.center[0]*pw, rm.center[1]*ph, rm.center[2]*pd };
+                double[] radii_mm_m  = new double[]{ rm.radii[0]*pw,  rm.radii[1]*ph,  rm.radii[2]*pd  };
+
                 double shellThickness = Math.max(pw, Math.max(ph, pd));
-                ImagePlus contour = generateEllipsoidContour(rm.center, rm.radii, 
-                    res_minus.getWidth(), res_minus.getHeight(), res_minus.getNSlices(),
-                    pw, ph, pd, shellThickness);
-                contour.show();
-                // ImagePlus composite = VitimageUtils.compositeNoAdjustOf(imp, contour, "Composite");
+                ImagePlus contour = generateEllipsoidContour(center_mm_m, radii_mm_m,
+                        res_minus.getWidth(), res_minus.getHeight(), res_minus.getNSlices(),
+                        pw, ph, pd, shellThickness);
                 ImagePlus composite = VitimageUtils.compositeNoAdjustOf(res_minus, contour, "Composite");
                 composite.setTitle("Negative Z Ellipsoid fit");
                 composite.show();
 
-            }
-            res_minus.show();
+        }
 
         if (rp.ok) {
                 double pw = res_plus.getCalibration().pixelWidth;  if (pw<=0) pw=1;
                 double ph = res_plus.getCalibration().pixelHeight; if (ph<=0) ph=1;
                 double pd = res_plus.getCalibration().pixelDepth;  if (pd<=0) pd=1;
-                
-                // Generate contour with shell thickness of ~1 pixel
+
+                double[] center_mm_p = new double[]{ rp.center[0]*pw, rp.center[1]*ph, rp.center[2]*pd };
+                double[] radii_mm_p  = new double[]{ rp.radii[0]*pw,  rp.radii[1]*ph,  rp.radii[2]*pd  };
+
                 double shellThickness = Math.max(pw, Math.max(ph, pd));
-                ImagePlus contour = generateEllipsoidContour(rp.center, rp.radii, 
-                    res_plus.getWidth(), res_plus.getHeight(), res_plus.getNSlices(),
-                    pw, ph, pd, shellThickness);
-                contour.show();
-                // ImagePlus composite = VitimageUtils.compositeNoAdjustOf(imp, contour, "Composite");
+                ImagePlus contour = generateEllipsoidContour(center_mm_p, radii_mm_p,
+                        res_plus.getWidth(), res_plus.getHeight(), res_plus.getNSlices(),
+                        pw, ph, pd, shellThickness);
                 ImagePlus composite = VitimageUtils.compositeNoAdjustOf(res_plus, contour, "Composite");
                 composite.setTitle("Positive Z Ellipsoid fit");
                 composite.show();
         }
         
     }
+    public static SymmetryResult buildSymmetricEllipsoids(ImagePlus mask, int cx, int cy, int cz) {
+        
+            ImagePlus minus = zMinus(mask, cz);
+            minus.show();
+            ImagePlus plus  = zPlus(mask,  cz);
+            plus.show();
+
+            ImagePlus cropMinus = cropZMinus(mask, cz);
+            cropMinus.show();
+            ImagePlus cropPlus  = cropZPlus(mask, cz); 
+            cropPlus.show();
+
+            ImagePlus fullFromMinus = expandMirrorY(expandMirrorZ(cropMinus, false) );
+
+            ImagePlus fullFromPlus  = expandMirrorY(expandMirrorZ(cropPlus, true) );
+
+
+            VitimageUtils.convertToGray8(fullFromMinus);
+            VitimageUtils.convertToGray8(fullFromPlus);
+
+            fullFromMinus.setTitle("Ellipsoid_Zminus_full");
+            fullFromPlus.setTitle("Ellipsoid_Zplus_full");
+            fullFromMinus.setCalibration(mask.getCalibration());
+            fullFromPlus.setCalibration(mask.getCalibration());
+
+            SymmetryResult r = new SymmetryResult();
+            r.fullFromMinus = fullFromMinus;
+            r.fullFromPlus  = fullFromPlus;
+
+            return r;
+        }
+    public static int reflectIdx(int i, int center, int size) {
+        int r = 2 * center - i;
+        if (r < 0)     r = 0;
+        if (r >= size) r = size - 1;
+        return r;
+    }
     public static void runEllipsoidBatch(Specimen specimen, String[] timestamps, int cx, int cy, int cz) {
-        String csv = Config.mainDir + "/Results/03_ProbabilisticAtlas/Ellipsoid_fit_results.csv";
+        String csv = Config.mainDir + "/Results/04_EllipsoidFitting/test_Ellipsoid_fit_results.csv";
         ensureCsvHeader(csv);
 
         for(int t = 1; t <5; t++){
             String maskPath = Config.mainDir + "Processing/04_Masks/07_MaskSurface3D/" + specimen.getName() + "_" + timestamps[t-1] + "_mask_contour.tif";
-            System.out.println(maskPath);
-
             ImagePlus mask = IJ.openImage(maskPath);
             if (mask == null) continue;
-
-            double pw = mask.getCalibration().pixelWidth;  if (pw <= 0) pw = 1;
-            double ph = mask.getCalibration().pixelHeight; if (ph <= 0) ph = 1;
-            double pd = mask.getCalibration().pixelDepth;  if (pd <= 0) pd = 1;
-
+            double pw = mask.getCalibration().pixelWidth;  if (pw <= 0) pw = 1; //pw:0.0351563
+            double ph = mask.getCalibration().pixelHeight; if (ph <= 0) ph = 1; //ph:0.0351563
+            double pd = mask.getCalibration().pixelDepth;  if (pd <= 0) pd = 1; //pd:0.0351563
+ 
             SymmetryResult res = buildSymmetricEllipsoids(mask, cx, cy, cz);
             ImagePlus res_minus = res.fullFromMinus;
             ImagePlus res_plus  = res.fullFromPlus;
@@ -154,7 +172,6 @@ public class Step_9_AxisAlignedEllipsoidFit implements PipelineStep{
             Result rm = fitFromImagePlus(res_minus, 255, SUBSAMPLE);
             Result rp = fitFromImagePlus(res_plus,  255, SUBSAMPLE);
 
-           
             appendEllipsoidResults(csv, specimen.getName(), timestamps[t-1], "negative_z", rm, pw, ph, pd);
             appendEllipsoidResults(csv, specimen.getName(), timestamps[t-1], "positive_z", rp, pw, ph, pd);
 
@@ -162,8 +179,6 @@ public class Step_9_AxisAlignedEllipsoidFit implements PipelineStep{
             System.out.println("Saved results for " + specimen.getName() + " at " + timestamps[t-1]);
         }
     }
-
-
     public static void saveEllipsoidResultsToCSV(Specimen specimen, Result rm, Result rp, String outputPath) {
         try (FileWriter fw = new FileWriter(outputPath)) {
             fw.write("specimen,region,ok,note,"
@@ -212,27 +227,27 @@ public class Step_9_AxisAlignedEllipsoidFit implements PipelineStep{
     private static double nz(double v) {
      return (Double.isNaN(v) || Double.isInfinite(v)) ? 0.0 : v;
     }
+    private static void appendEllipsoidResults(String csvPath, String specimen, String ts, String region, Result r, double pw, double ph, double pd) {
+        // r.center / r.radii are in PIXELS now
+        double cx_px = (r.center == null) ? Double.NaN : r.center[0];
+        double cy_px = (r.center == null) ? Double.NaN : r.center[1];
+        double cz_px = (r.center == null) ? Double.NaN : r.center[2];
 
-    private static void appendEllipsoidResults(String csvPath, String specimen, String ts, String region, Result r,double pw, double ph, double pd  ) {
-        // String note = (r.note == null ? "" : r.note).replace(",", " "); // keep CSV clean
-        double cx_mm = (r.center == null) ? Double.NaN : r.center[0];
-        double cy_mm = (r.center == null) ? Double.NaN : r.center[1];
-        double cz_mm = (r.center == null) ? Double.NaN : r.center[2];
+        double rx_px = (r.radii  == null) ? Double.NaN : r.radii[0];
+        double ry_px = (r.radii  == null) ? Double.NaN : r.radii[1];
+        double rz_px = (r.radii  == null) ? Double.NaN : r.radii[2];
 
-        double rx_mm = (r.radii  == null) ? Double.NaN : r.radii[0];
-        double ry_mm = (r.radii  == null) ? Double.NaN : r.radii[1];
-        double rz_mm = (r.radii  == null) ? Double.NaN : r.radii[2];
+        // mm = px * (mm per px)
+        double cx_mm = cx_px * pw, cy_mm = cy_px * ph, cz_mm = cz_px * pd;
+        double rx_mm = rx_px * pw, ry_mm = ry_px * ph, rz_mm = rz_px * pd;
 
-        // px = mm / (mm per px)
-        double cx_px = cx_mm / pw, cy_px = cy_mm / ph, cz_px = cz_mm / pd;
-        double rx_px = rx_mm / pw, ry_px = ry_mm / ph, rz_px = rz_mm / pd;
-
-        // residuals: treat r.meanResidual/stdResidual as mm-scaled; convert to px via RMS voxel size
+        // residuals are in px (because fit was in px); also provide mm via RMS voxel size
         double voxelRms_mmPerPx = Math.sqrt((pw*pw + ph*ph + pd*pd) / 3.0);
-        double mean_mm = r.meanResidual;
-        double std_mm  = r.stdResidual;
-        double mean_px = mean_mm / voxelRms_mmPerPx;
-        double std_px  = std_mm  / voxelRms_mmPerPx;
+        double mean_px = r.meanResidual;
+        double std_px  = r.stdResidual;
+        double mean_mm = mean_px * voxelRms_mmPerPx;
+        double std_mm  = std_px  * voxelRms_mmPerPx;
+
         String line = String.format(java.util.Locale.US,
             "%s,%s,%s," +                 // specimen, timestamp, region
             "%.6f,%.6f,%.6f," +           // center px
@@ -251,9 +266,6 @@ public class Step_9_AxisAlignedEllipsoidFit implements PipelineStep{
         );
         IJ.append(line, csvPath);
     }
-            
-
-    // --- Result container ---
     public static class Result {
         public double[] center;      // [x0,y0,z0]
         public double[] radii;       // [rx,ry,rz]
@@ -262,19 +274,9 @@ public class Step_9_AxisAlignedEllipsoidFit implements PipelineStep{
         public int nPoints;
         public boolean ok;           // true if rx,ry,rz real positives
         public String note;          // diagnostics
-    }
-    /**
-     * Fit an axis-aligned ellipsoid from a set of 3D points (typically surface points).
-     * The quadric has no cross terms: Ax^2 + By^2 + Cz^2 + Dx + Ey + Fz + G = 0.
-     * We solve the homogeneous least-squares problem D p ≈ 0 via SVD (smallest singular vector),
-     * then complete the square to obtain center and radii.
-     *
-     * @param pts  N×3 array of points [x,y,z], ideally near the ellipsoid surface; need >= 6
-     * @return fit result with center, radii, residual stats and flags
-     */
-   
+    }  
     public static Result fitFromPoints(double[][] pts){
-        System.out.println("Number of points = " + (pts == null ? "null" : pts.length));
+        // System.out.println("Number of points = " + (pts == null ? "null" : pts.length));
         if (pts==null || pts.length < 6) throw new IllegalArgumentException("Need >= 6 points");
 
         // 1) center + scale (use stddev or range)
@@ -359,25 +361,15 @@ public class Step_9_AxisAlignedEllipsoidFit implements PipelineStep{
         R.note="normalized fit";
         return R;
     }
-
-      /**
-     * Convenience wrapper: extract SURFACE points from an ImagePlus, in PHYSICAL units (mm),
-     * then fit the ellipsoid. Foreground is matched against 'foreground' (e.g. 255 for 8-bit binary).
-     * If your image is float 0/1, either convert to 8-bit or modify extraction to (getf>0).
-     */
     public static Result fitFromImagePlus(ImagePlus imp, int foreground, double subsample){
         double pw = imp.getCalibration().pixelWidth;  if (pw<=0) pw=1;
         double ph = imp.getCalibration().pixelHeight; if (ph<=0) ph=1;
         double pd = imp.getCalibration().pixelDepth;  if (pd<=0) pd=1;
         double[][] pts = extractSurfacePoints(imp, foreground, subsample, pw, ph, pd);
         if (pts == null || pts.length < 6) return noContour(pts == null ? 0 : pts.length);
-
         return fitFromPoints(pts);
     }
-
-    // ----------------- Image surface extraction -----------------
     private static double[][] extractSurfacePoints(ImagePlus imp, int fg, double keepRate, double pw, double ph, double pd) {
-        Random rnd = new Random(42);
         List<double[]> list = new ArrayList<>();
         ImageStack stack = imp.getStack();
         int w = imp.getWidth(); int h = imp.getHeight(); int d = imp.getNSlices();
@@ -385,41 +377,35 @@ public class Step_9_AxisAlignedEllipsoidFit implements PipelineStep{
             ImageProcessor ip = stack.getProcessor(z+1);
             for (int y=1; y<h-1; y++) for (int x=1; x<w-1; x++) {
                 int v = ip.get(x, y) & 0xFF; if (v != fg) continue;
-                if (keepRate < 1.0 && rnd.nextDouble() > keepRate) continue;
-                double X = (x + 0.5) * pw; double Y = (y + 0.5) * ph; double Z = (z + 0.5) * pd;
+                double X = x, Y = y, Z = z;
                 list.add(new double[]{X, Y, Z});
             }
         }
-        double[][] pts = new double[list.size()][]; for (int i=0;i<list.size();i++) pts[i] = list.get(i); return pts;
+        double[][] pts = new double[list.size()][];
+        for (int i=0;i<list.size();i++) pts[i] = list.get(i);
+        return pts;
     }
-
-
-    /** Keep slices with z < cz0 (lower/negative-Z half), zero elsewhere. Output is float, same W×H×Z */
-    public static ImagePlus zMinus(ImagePlus mask, int cz0) {
-        int W=mask.getWidth(), H=mask.getHeight(), Z=mask.getStackSize();
-        ImageStack out = new ImageStack(W,H);
-        for (int z=0; z<Z; z++) {
-            ImageProcessor ip = mask.getStack().getProcessor(z+1);
-            FloatProcessor fp = new FloatProcessor(W,H);
-            if (z < cz0) {
-                fp.setPixels(ip.toFloat(0, null).getPixels());
-            } 
-            out.addSlice(fp);
-        }
-        return new ImagePlus(mask.getTitle()+"_Zminus", out);
-    }
-    
-    /** Keep slices with z >= cz0 (upper/positive-Z half), zero elsewhere. Output is float, same W×H×Z */
-    public static ImagePlus zPlus(ImagePlus mask, int cz0) {
+   public static ImagePlus zMinus(ImagePlus mask, int cz0) {
         final int W = mask.getWidth(), H = mask.getHeight(), Z = mask.getStackSize();
-        cz0 = Math.max(0, Math.min(cz0, Z - 1)); // clamp
+        cz0 = Math.max(0, Math.min(cz0, Z - 1)); 
         ImageStack out = new ImageStack(W, H);
-
         for (int z = 0; z < Z; z++) {
             ImageProcessor ip = mask.getStack().getProcessor(z + 1);
-            FloatProcessor fp = (z >= cz0)
-                    ? (FloatProcessor) ip.convertToFloat()
-                    : new FloatProcessor(W, H); // zeros
+            FloatProcessor fp = (z <= cz0) ? (FloatProcessor) ip.convertToFloat() : new FloatProcessor(W, H); 
+            out.addSlice(mask.getStack().getSliceLabel(z + 1), fp);
+        }
+        ImagePlus res = new ImagePlus(mask.getTitle() + "_Zminus", out);
+        res.copyScale(mask);
+        res.setCalibration(mask.getCalibration().copy());
+        return res;
+    }
+    public static ImagePlus zPlus(ImagePlus mask, int cz0) {
+        final int W = mask.getWidth(), H = mask.getHeight(), Z = mask.getStackSize();
+        cz0 = Math.max(0, Math.min(cz0, Z - 1)); 
+        ImageStack out = new ImageStack(W, H);
+        for (int z = 0; z < Z; z++) {
+            ImageProcessor ip = mask.getStack().getProcessor(z + 1);
+            FloatProcessor fp = (z >= cz0) ? (FloatProcessor) ip.convertToFloat() : new FloatProcessor(W, H); 
             out.addSlice(mask.getStack().getSliceLabel(z + 1), fp);
         }
         ImagePlus res = new ImagePlus(mask.getTitle() + "_Zplus", out);
@@ -427,9 +413,6 @@ public class Step_9_AxisAlignedEllipsoidFit implements PipelineStep{
         res.setCalibration(mask.getCalibration().copy());
         return res;
     }
-        
-    /** Compute tight 3D bounding box of non-zero voxels. Returns [xmin,xmax,ymin,ymax,zmin,zmax]
-     *  If empty, returns [W,-1,H,-1,Z,-1] which the crop3D guard treats as empty. */
     public static int[] bbox3D(ImagePlus img) {
         int W=img.getWidth(), H=img.getHeight(), Z=img.getStackSize();
         int xmin=W, xmax=-1, ymin=H, ymax=-1, zmin=Z, zmax=-1;
@@ -447,8 +430,6 @@ public class Step_9_AxisAlignedEllipsoidFit implements PipelineStep{
         }
         return new int[]{xmin,xmax,ymin,ymax,zmin,zmax};
     }
-    
-    /** Crop image to bounding box b=[xmin,xmax,ymin,ymax,zmin,zmax]. Preserves calibration */
     public static ImagePlus crop3D(ImagePlus img, int[] b) {
    
         if (b[1]<b[0] || b[3]<b[2] || b[5]<b[4]) return new ImagePlus(img.getTitle()+"_empty", new ImageStack(1,1));
@@ -463,9 +444,6 @@ public class Step_9_AxisAlignedEllipsoidFit implements PipelineStep{
         res.setCalibration(img.getCalibration());    // <-- keep mm units
         return res;
     }
-
-
-    /** Show cropped halves */
     public static void doBoxes(ImagePlus mask, int cx0, int cy0, int cz0) {
     // 1) split
         ImagePlus minus = zMinus(mask, cz0);
@@ -494,63 +472,10 @@ public class Step_9_AxisAlignedEllipsoidFit implements PipelineStep{
         int czPlusLocal  = cz0 - boxPlus[4];
         System.out.println("locals (for mirroring later)  Z-: cy="+cyMinusLocal+" cz="+czMinusLocal+"   Z+: cy="+cyPlusLocal+" cz="+czPlusLocal);
     }
-    
-    
-    /** Holder for the two symmetric full masks built from Z- and Z+ halves. */
     public static class SymmetryResult {
             public ImagePlus fullFromMinus; // full symmetric ellipsoid from Z- side
             public ImagePlus fullFromPlus;  // full symmetric ellipsoid from Z+ side
     }
-    /**
-     * Build two full symmetric volumes:
-     *  - Split at cz into Z- and Z+ halves
-     *  - Crop each tightly
-     *  - Expand canvas by mirroring along Z (depth -> 2*Z-1), then along Y (height -> 2*H-1)
-     *  - Return two full volumes (one per half). Calibration preserved.
-     */
-    public static SymmetryResult buildSymmetricEllipsoids(ImagePlus mask, int cx, int cy, int cz) {
-        
-         // 1) Split at cz into Z- and Z+
-        ImagePlus minus = zMinus(mask, cz);
-        ImagePlus plus  = zPlus(mask,  cz);
-
-        // 2) Bounding boxes
-        int[] boxMinus = bbox3D(minus);
-        int[] boxPlus  = bbox3D(plus);
-
-        // 3) Crop halves
-        ImagePlus cropMinus = cropZMinus(mask, cz); ;
-        ImagePlus cropPlus  = cropZPlus(mask, cz); ;
-
-        // 4) Expand canvas by mirroring: first Z, then Y  (→ doubles depth, then height)
-        ImagePlus fullFromMinus = expandMirrorY( expandMirrorZ(cropMinus, false) );
-        ImagePlus fullFromPlus  = expandMirrorY( expandMirrorZ(cropPlus, true)  );
-        VitimageUtils.convertToGray8(fullFromMinus);
-        VitimageUtils.convertToGray8(fullFromPlus);
-
-        // 6) Titles + calibration
-        fullFromMinus.setTitle("Ellipsoid_Zminus_full");
-        fullFromPlus.setTitle("Ellipsoid_Zplus_full");
-        fullFromMinus.setCalibration(mask.getCalibration());
-        fullFromPlus.setCalibration(mask.getCalibration());
-
-        SymmetryResult r = new SymmetryResult();
-        r.fullFromMinus = fullFromMinus;
-        r.fullFromPlus  = fullFromPlus;
-
-        return r;
-    }
-    /** Reflect index i around 'center' and clamp to [0, size-1]. Used for in-place mirroring. */
-    public static int reflectIdx(int i, int center, int size) {
-        int r = 2 * center - i;
-        if (r < 0)     r = 0;
-        if (r >= size) r = size - 1;
-        return r;
-    }
-    
-
-    
-    /** In-place OR-mirroring across Z (keeps same size) */
     public static ImagePlus mirrorZ(ImagePlus img, int cz) {
         int W = img.getWidth();
         int H = img.getHeight();
@@ -578,33 +503,6 @@ public class Step_9_AxisAlignedEllipsoidFit implements PipelineStep{
             result.setCalibration(img.getCalibration());
             return result;
         }
-        public static ImagePlus cropZMinus(ImagePlus img, int cz) {
-        int W = img.getWidth(), H = img.getHeight(), Z = img.getStackSize();
-        int z0 = 0, z1 = Math.min(cz, Z-1);
-        if (z1 < z0) return new ImagePlus(img.getTitle()+"_Zminus_empty", new ImageStack(1,1));
-        ImageStack out = new ImageStack(W, H);
-        for (int z = z0; z <= z1; z++) {
-            out.addSlice(img.getStack().getProcessor(z+1).duplicate());
-        }
-        ImagePlus res = new ImagePlus(img.getTitle()+"_Zminus", out);
-        res.setCalibration(img.getCalibration());
-        return res;
-    }
-
-    public static ImagePlus cropZPlus(ImagePlus img, int cz) {
-        int W = img.getWidth(), H = img.getHeight(), Z = img.getStackSize();
-        int z0 = Math.min(cz+1, Z);   // first kept slice
-        int z1 = Z - 1;
-        if (z1 < z0) return new ImagePlus(img.getTitle()+"_Zplus_empty", new ImageStack(1,1));
-        ImageStack out = new ImageStack(W, H);
-        for (int z = z0; z <= z1; z++) {
-            out.addSlice(img.getStack().getProcessor(z+1).duplicate());
-        }
-        ImagePlus res = new ImagePlus(img.getTitle()+"_Zplus", out);
-        res.setCalibration(img.getCalibration());
-        return res;
-    }
-
     public static ImagePlus mirrorY(ImagePlus img, int cy) {
         int W = img.getWidth(),H = img.getHeight(), Z = img.getStack().getSize();
         ImageStack out = new ImageStack(W, H);
@@ -626,6 +524,34 @@ public class Step_9_AxisAlignedEllipsoidFit implements PipelineStep{
         result.setCalibration(img.getCalibration());
         return result;
     }
+/** Keep slices 0..cz (inclusive). */
+    public static ImagePlus cropZMinus(ImagePlus img, int cz) {
+        int W = img.getWidth(), H = img.getHeight(), Z = img.getStackSize();
+        cz = Math.max(0, Math.min(cz, Z - 1));
+        ImageStack out = new ImageStack(W, H);
+
+        for (int z = 0; z <= cz; z++) { // include cz
+            out.addSlice(img.getStack().getProcessor(z + 1).duplicate());
+        }
+
+        ImagePlus res = new ImagePlus(img.getTitle() + "_Zminus", out);
+        res.setCalibration(img.getCalibration());
+        return res;
+    }
+
+    public static ImagePlus cropZPlus(ImagePlus img, int cz) {
+        int W = img.getWidth(), H = img.getHeight(), Z = img.getStackSize();
+        cz = Math.max(0, Math.min(cz, Z - 1)); // clamp cz to valid range
+        ImageStack out = new ImageStack(W, H);
+
+        for (int z = cz; z < Z-1; z++) { // start at cz, include it
+            out.addSlice(img.getStack().getProcessor(z + 1).duplicate());
+        }
+
+        ImagePlus res = new ImagePlus(img.getTitle() + "_Zplus", out);
+        res.setCalibration(img.getCalibration());
+        return res;
+    } 
     public static ImagePlus expandMirrorZ(ImagePlus halfZ, boolean midAtStart) {
         int W = halfZ.getWidth(), H = halfZ.getHeight(), Z = halfZ.getStackSize();
         ImageStack out = new ImageStack(W, H);
@@ -656,23 +582,6 @@ public class Step_9_AxisAlignedEllipsoidFit implements PipelineStep{
         res.setCalibration(halfZ.getCalibration());
         return res;
     }
-    // public static ImagePlus expandMirrorZ(ImagePlus halfZ) {
-    //     int W = halfZ.getWidth(), H = halfZ.getHeight(), Z = halfZ.getStackSize();
-    //     ImageStack out = new ImageStack(W, H);
-    //     // original 0..Z-1
-    //     for (int z=0; z<Z; z++) {
-    //         float[] src = (float[]) halfZ.getStack().getProcessor(z+1).convertToFloat().getPixels();
-    //         out.addSlice(new FloatProcessor(W, H, src.clone()));
-    //     }
-    //     // reversed 0..Z-2 → appended
-    //     for (int z=Z-2; z>=0; z--) {
-    //         float[] src = (float[]) halfZ.getStack().getProcessor(z+1).convertToFloat().getPixels();
-    //         out.addSlice(new FloatProcessor(W, H, src.clone()));
-    //     }
-    //     ImagePlus res = new ImagePlus(halfZ.getTitle()+"_expandZ", out);
-    //     res.setCalibration(halfZ.getCalibration());
-    //     return res;
-    // }
     public static ImagePlus expandMirrorY(ImagePlus halfY) {
     int W = halfY.getWidth(), H = halfY.getHeight(), Z = halfY.getStackSize();
         int Hnew = 2*H - 1;
@@ -696,8 +605,6 @@ public class Step_9_AxisAlignedEllipsoidFit implements PipelineStep{
         res.setCalibration(halfY.getCalibration());
         return res;
     }
-
-
     public static ImagePlus generateFilledEllipsoid(double[] center, double[] radii,
                                                      int width, int height, int depth,
                                                      double pixelWidth, double pixelHeight, double pixelDepth) {
@@ -708,15 +615,18 @@ public class Step_9_AxisAlignedEllipsoidFit implements PipelineStep{
         
         for (int z = 0; z < depth; z++) {
             ImageProcessor ip = stack.getProcessor(z + 1);
-            double Z = (z + 0.5) * pixelDepth;
+            double Z = z  * pixelDepth;
+            // double Z = (z + 0.5) * pixelDepth;
             double dz = Z - z0;
             
             for (int y = 0; y < height; y++) {
-                double Y = (y + 0.5) * pixelHeight;
+                double Y = y * pixelHeight;
+                // double Y = (y + 0.5) * pixelHeight;
                 double dy = Y - y0;
                 
                 for (int x = 0; x < width; x++) {
-                    double X = (x + 0.5) * pixelWidth;
+                    double X = x * pixelWidth;
+                    // double X = (x + 0.5) * pixelWidth;
                     double dx = X - x0;
                     
                     // Check if point is inside ellipsoid
@@ -734,7 +644,6 @@ public class Step_9_AxisAlignedEllipsoidFit implements PipelineStep{
         imp.getCalibration().pixelDepth = pixelDepth;
         return imp;
     }
-
     public static ImagePlus generateEllipsoidContour(double[] center, double[] radii,
                                                       int width, int height, int depth,
                                                       double pixelWidth, double pixelHeight, double pixelDepth,
@@ -746,15 +655,15 @@ public class Step_9_AxisAlignedEllipsoidFit implements PipelineStep{
         
         for (int z = 0; z < depth; z++) {
             ImageProcessor ip = stack.getProcessor(z + 1);
-            double Z = (z + 0.5) * pixelDepth;
+            double Z = z  * pixelDepth;
             double dz = Z - z0;
             
             for (int y = 0; y < height; y++) {
-                double Y = (y + 0.5) * pixelHeight;
+                double Y = y  * pixelHeight;
                 double dy = Y - y0;
                 
                 for (int x = 0; x < width; x++) {
-                    double X = (x + 0.5) * pixelWidth;
+                    double X = x  * pixelWidth;
                     double dx = X - x0;
                     
                     // Compute normalized ellipsoid function value
@@ -784,7 +693,6 @@ public class Step_9_AxisAlignedEllipsoidFit implements PipelineStep{
         imp.getCalibration().pixelDepth = pixelDepth;
         return imp;
     }
-
     private static Result noContour(int n){
         Result r = new Result();
         r.ok = false;
