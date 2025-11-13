@@ -1,4 +1,4 @@
-package io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D;
+package io.github.rocsg.fijiyama.gargeetest.cuttings.testing;
 
 
 // AxisAlignedEllipsoidFit.java
@@ -32,10 +32,9 @@ import io.github.rocsg.fijiyama.common.VitimageUtils;
 public class Step_9_AxisAlignedEllipsoidFit implements PipelineStep {
 
     // === Configuration ===
-    private static final String DEFAULT_PATH = Config.mainDir + "/Processing/04_Masks/07_MaskSurface3D/B_206_J141_mask_contour.tif";
+    private static final String DEFAULT_PATH = Config.mainDir + "/Processing/04_Masks/07_MaskSurface3D/B_231_J077_mask_contour.tif";
     private static final int FOREGROUND = 255;   
     private static final double SUBSAMPLE = 1.0; 
-    private static int THRESHOLD_MIN_NUMBER_POINTS=100; 
 
     // === Entry Points ===
     @Override
@@ -45,17 +44,19 @@ public class Step_9_AxisAlignedEllipsoidFit implements PipelineStep {
 
     public static void main(String[] args) throws Exception {
         ImageJ ij = new ImageJ();
-        Specimen spec = new Specimen("B_202");
+        String path = (args.length > 0) ? args[0] : DEFAULT_PATH;
+        ImagePlus imp = IJ.openImage(path);
+        if (imp == null) { System.err.println("Cannot open: " + path); return; }
+        Specimen spec = new Specimen("B_231");
         new Step_9_AxisAlignedEllipsoidFit().execute(spec, true);
     }
 
     public void execute(Specimen specimen, boolean testing) throws Exception {
         ImagePlus mask = IJ.openImage(DEFAULT_PATH);
-        int cx = 150, cy = 100, cz = 255;  
+        int cx = 160, cy = 100, cz = 255;  
         String[] timestamps = Config.timestamps;
         // runEllipsoidBatch(specimen, timestamps, cx, cy, cz);
-        verifyResults(specimen, mask, timestamps, cx, cy, cz); 
-        // buildSymmetricEllipsoids(mask, cx, cy, cz);
+        buildSymmetricEllipsoids(mask, cx, cy, cz);
     }
 
     // === Verification / Visualization ===
@@ -120,16 +121,15 @@ public class Step_9_AxisAlignedEllipsoidFit implements PipelineStep {
     // === Symmetry Construction ===
     public static SymmetryResult buildSymmetricEllipsoids(ImagePlus mask, int cx, int cy, int cz) {
         //Split the mask into two halves
-        ImagePlus minus = zMinus(mask, cz); //minus.show();
-        ImagePlus plus  = zPlus(mask,  cz); //plus.show();
+        ImagePlus minus = zMinus(mask, cz); minus.show();  
+        ImagePlus plus  = zPlus(mask,  cz); plus.show();
 
-        ImagePlus cropMinus = cropZMinus(minus, cz);  //cropMinus.show();
-        ImagePlus cropPlus  = cropZPlus(plus, cz);  //cropPlus.show();
+        ImagePlus cropMinus = cropZMinus(minus, cz);  cropMinus.show();
+        ImagePlus cropPlus  = cropZPlus(plus, cz);  cropPlus.show();
 
 
         ImagePlus fullFromMinus = expandMirrorY(expandMirrorZ(cropMinus, false)); fullFromMinus.show();
-        ImagePlus fullFromPlus  = expandMirrorY(expandMirrorZ(cropPlus, true)); 
-        fullFromPlus.show();
+        ImagePlus fullFromPlus  = expandMirrorY(expandMirrorZ(cropPlus, true)); fullFromPlus.show();
 
         VitimageUtils.convertToGray8(fullFromMinus);
         VitimageUtils.convertToGray8(fullFromPlus);
@@ -237,15 +237,6 @@ public class Step_9_AxisAlignedEllipsoidFit implements PipelineStep {
         // System.out.println("Number of points = " + (pts == null ? "null" : pts.length));
         if (pts==null || pts.length < 6) throw new IllegalArgumentException("Need >= 6 points");
 
-        if(pts.length<THRESHOLD_MIN_NUMBER_POINTS){
-            Result R = new Result();
-            R.ok=true;
-            R.center=new double[]{150,100,256};
-            R.radii =new double[]{0,0,0};
-            R.meanResidual=0; R.stdResidual=0; R.nPoints=pts.length;
-            R.note="not enough points for fitting";
-            return R;
-        }
         // 1) center + scale (use stddev or range)
         int n = pts.length;
         double mx=0,my=0,mz=0;
@@ -280,12 +271,8 @@ public class Step_9_AxisAlignedEllipsoidFit implements PipelineStep {
             D[i][5] = z;    // F
             D[i][6] = 1.0;  // G
         }
-        // System.out.println("sx, sy, sz = " + sx + ", " + sy + ", " + sz);
-        RealMatrix realMat=MatrixUtils.createRealMatrix(D);
-        // System.out.println("\n\nRealMatrix="+realMat);
-        RealMatrix getv=new SingularValueDecomposition(realMat).getV();
-        // System.out.println("\n\nGetV="+getv);
-        RealVector p = getv.getColumnVector(6);
+        RealVector p = new SingularValueDecomposition(MatrixUtils.createRealMatrix(D))
+                        .getV().getColumnVector(6);
 
         double A = p.getEntry(0), B = p.getEntry(1), C = p.getEntry(2);
         double Dp = p.getEntry(3), Ep = p.getEntry(4), Fp = p.getEntry(5), G = p.getEntry(6);
@@ -294,9 +281,6 @@ public class Step_9_AxisAlignedEllipsoidFit implements PipelineStep {
         if (A<0 || B<0 || C<0){
             A=-A; B=-B; C=-C; Dp=-Dp; Ep=-Ep; Fp=-Fp; G=-G;
         }
-
-
-
 
         // 4) complete the square in normalized space
         Result R = new Result();

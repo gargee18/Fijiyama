@@ -27,10 +27,7 @@ public class MainController {
 
    
    public static void test() throws Exception{
-       // List<Specimen> specimens = loadPCHSpecimens();
-      
-       // for(Specimen s:specimens)System.out.println(s);
-       Specimen spec= new Specimen("B_201");
+       Specimen spec= new Specimen("B_231");
        List<PipelineStep> steps = getStepsForDevPipeline();
        Pipeline pipeline = new Pipeline(steps);
        pipeline.run(spec);
@@ -41,8 +38,6 @@ public class MainController {
        try {
            // Load specimen data
            List<Specimen> specimens = loadAllSpecimens();
-        //    List<Specimen> specimens = loadPCHSpecimens();
-        //    List<Specimen> specimens = loadTestSpecimens();
            
 
            // Define the pipeline steps
@@ -83,7 +78,7 @@ public class MainController {
 
    public static ArrayList<PipelineStep>getStepsForDevPipeline(){
        ArrayList<PipelineStep> steps = new ArrayList<PipelineStep>();
-       steps.add(new Step_7_ProbabilisticAtlas());
+       steps.add(new Step_9_AxisAlignedEllipsoidFit());
        return steps;
    }
 
@@ -119,10 +114,22 @@ public class MainController {
    }
    
    public static  List<Specimen>loadTestSpecimens(){ 
-    
-       List<Specimen> testList=loadAllSpecimens().subList(3, loadAllSpecimens().size());
+       List<Specimen> testList=loadAllSpecimens().subList(10, loadAllSpecimens().size());
        return testList;
    }
+
+   public static List<Specimen> loadRandomSpecimen(){
+        List<Specimen> allSpecimens = loadAllSpecimens();
+        int startIndx = 0;
+        for (int i=0; i<allSpecimens.size(); i++) 
+            if (allSpecimens.get(i).getName().equals("B_232")) {
+            startIndx = i;
+            break;
+        }
+        return allSpecimens.subList(startIndx, allSpecimens.size());
+   }
+
+
 
    public static List<Specimen> loadCTSpecimens() {
        List<Specimen> allSpecimens = loadAllSpecimens();
