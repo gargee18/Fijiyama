@@ -13,7 +13,8 @@ import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_4_Hyper
 import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_5_PolarTransform;
 import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_6_MeanIndividual;
 import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_7_ProbabilisticAtlas;
-import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_9_AxisAlignedEllipsoidFit;
+import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_8_AxisAlignedEllipsoidFit;
+import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_9_BoundingBox;
 import io.github.rocsg.fijiyama.gargeetest.cuttings.core.Pipeline;
 import io.github.rocsg.fijiyama.gargeetest.cuttings.core.PipelineStep;
 
@@ -72,13 +73,14 @@ public class MainController {
        steps.add(new Step_5_PolarTransform());
        steps.add(new Step_6_MeanIndividual());
        steps.add(new Step_7_ProbabilisticAtlas());
-       steps.add(new Step_9_AxisAlignedEllipsoidFit());
+       steps.add(new Step_8_AxisAlignedEllipsoidFit());
+       steps.add(new Step_9_BoundingBox());
        return steps;
    }
 
    public static ArrayList<PipelineStep>getStepsForDevPipeline(){
        ArrayList<PipelineStep> steps = new ArrayList<PipelineStep>();
-       steps.add(new Step_9_AxisAlignedEllipsoidFit());
+       steps.add(new Step_9_BoundingBox());
        return steps;
    }
 
@@ -113,16 +115,28 @@ public class MainController {
        return listSpecimen;
    }
    
-   public static  List<Specimen>loadTestSpecimens(){ 
-       List<Specimen> testList=loadAllSpecimens().subList(10, loadAllSpecimens().size());
-       return testList;
-   }
+    public static  List<Specimen>loadTestSpecimens(){ 
+        List<Specimen> testList=loadAllSpecimens().subList(10, loadAllSpecimens().size());
+        return testList;
+    }
+    public static List<Specimen> loadSpecimenByName(String specimenName) {
+        List<Specimen> result = new ArrayList<>();
+        for (Specimen s : loadAllSpecimens()) {
+            if (s.getName().equals(specimenName)) {
+                result.add(s);
+                break;
+            }
+        }
+        return result;
+    }
+
+
 
    public static List<Specimen> loadRandomSpecimen(){
         List<Specimen> allSpecimens = loadAllSpecimens();
         int startIndx = 0;
         for (int i=0; i<allSpecimens.size(); i++) 
-            if (allSpecimens.get(i).getName().equals("B_232")) {
+            if (allSpecimens.get(i).getName().equals("B_222")) {
             startIndx = i;
             break;
         }

@@ -6,6 +6,34 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Step_9_BoundingBox",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_9_BoundingBox",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "Step_8_AxisAlignedEllipsoidFit",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_8_AxisAlignedEllipsoidFit",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "Step_8_BoundingBox",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_8_BoundingBox",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "VerifyMasks",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.testing.VerifyMasks",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
             "name": "Step_9_AxisAlignedEllipsoidFit",
             "request": "launch",
             "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.testing.Step_9_AxisAlignedEllipsoidFit",

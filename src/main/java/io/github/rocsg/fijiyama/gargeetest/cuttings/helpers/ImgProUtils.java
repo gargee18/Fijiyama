@@ -25,6 +25,17 @@ public class ImgProUtils {
         return img;
         
     }
+
+    public static void verfifyProcessing(Specimen specimen, String[] timestamps){
+        for (int t = 1; t <5; t++){
+            String path = Config.mainDir + "Processing/04_Masks/07_MaskSurface3D/" + specimen.getName() + "_" + timestamps[t-1] + "_mask_contour.tif";
+            ImagePlus img = IJ.openImage(path);
+            img.show();
+            VitimageUtils.waitFor(3000);
+            img.close();
+        }        
+
+    }
     
   
     public static ImagePlus trainWekaToGetMask(String path, int frame){
@@ -564,7 +575,152 @@ public class ImgProUtils {
         }
      */
 
+    // === Bounding Box & Cropping ===
+    public static int[] bbox3D(ImagePlus img) {
+        int W=img.getWidth(), H=img.getHeight(), Z=img.getStackSize();
+        int xmin=W, xmax=-1, ymin=H, ymax=-1, zmin=Z, zmax=-1;
+        for (int z=0; z<Z; z++) {
+            ImageProcessor ip = img.getStack().getProcessor(z+1);
+            boolean any=false;
+            for (int y=0; y<H; y++) for (int x=0; x<W; x++) {
+                if (ip.getf(x,y) > 0f) {
+                    if (x<xmin) xmin=x; if (x>xmax) xmax=x;
+                    if (y<ymin) ymin=y; if (y>ymax) ymax=y;
+                    any = true;
+                }
+            }
+            if (any) { if (z<zmin) zmin=z; if (z>zmax) zmax=z; }
+        }
+        return new int[]{xmin,xmax,ymin,ymax,zmin,zmax};
+    }
+    public static ImagePlus crop3D(ImagePlus img, int[] b) {
+        if (b[1]<b[0] || b[3]<b[2] || b[5]<b[4]) return new ImagePlus(img.getTitle()+"_empty", new ImageStack(1,1));
+        int x0=b[0], y0=b[2], w=b[1]-b[0]+1, h=b[3]-b[2]+1;
+        ImageStack out = new ImageStack(w,h);
+        for (int z=b[4]; z<=b[5]; z++) {
+            ImageProcessor ip = img.getStack().getProcessor(z+1);
+            ip.setRoi(new java.awt.Rectangle(x0,y0,w,h));
+            out.addSlice(ip.crop());
+        }
+        ImagePlus res = new ImagePlus(img.getTitle()+"_crop", out);
+        res.setCalibration(img.getCalibration());   
+        return res;
+    }
+    public static ImagePlus zMinus(ImagePlus mask, int cz0) {
+        final int W = mask.getWidth(), H = mask.getHeight(), Z = mask.getStackSize();
+        ImageStack out = new ImageStack(W, H);
+        for (int z = 0; z < Z; z++) {
+            ImageProcessor ip = mask.getStack().getProcessor(z+1); 
+            FloatProcessor fp = (z <= cz0) ? (FloatProcessor) ip.convertToFloat() : new FloatProcessor(W, H); 
+            out.addSlice(mask.getStack().getSliceLabel(z + 1), fp);
+        }
+        ImagePlus res = new ImagePlus(mask.getTitle() + "_Zminus", out); 
+        res.copyScale(mask);
+        res.setCalibration(mask.getCalibration().copy());
+        return res;
+    }
+    public static ImagePlus zPlus(ImagePlus mask, int cz0) { 
+        final int W = mask.getWidth(), H = mask.getHeight(), Z = mask.getStackSize();
+        cz0 = Math.max(0, Math.min(cz0, Z - 1)); 
+        ImageStack out = new ImageStack(W, H);
+        for (int z = 0; z < Z; z++) {
+            ImageProcessor ip = mask.getStack().getProcessor(z + 1);
+            FloatProcessor fp = (z >= cz0) ? (FloatProcessor) ip.convertToFloat() : new FloatProcessor(W, H); 
+            out.addSlice(mask.getStack().getSliceLabel(z + 1), fp);
+        }
+        ImagePlus res = new ImagePlus(mask.getTitle() + "_Zplus", out);
+        res.copyScale(mask);
+        res.setCalibration(mask.getCalibration().copy());
+        return res;
+    }
+     public static ImagePlus cropZMinus(ImagePlus img, int cz) {
+        int W = img.getWidth(), H = img.getHeight(), Z = img.getStackSize();
+        cz = Math.max(0, Math.min(cz, Z - 1));
+        ImageStack out = new ImageStack(W, H);
 
+        for (int z = 0; z <= cz; z++) { // include cz
+            out.addSlice(img.getStack().getProcessor(z + 1).duplicate());
+        }
+
+        ImagePlus res = new ImagePlus(img.getTitle() + "_Zminus", out);
+        res.setCalibration(img.getCalibration());
+        return res;
+    }
+    public static ImagePlus cropZPlus(ImagePlus img, int cz) {
+        int W = img.getWidth(), H = img.getHeight(), Z = img.getStackSize();
+        cz = Math.max(0, Math.min(cz, Z - 1)); // clamp cz to valid range
+        ImageStack out = new ImageStack(W, H);
+
+        for (int z = cz; z < Z-1; z++) { // start at cz, include it
+            out.addSlice(img.getStack().getProcessor(z + 1).duplicate());
+        }
+
+        ImagePlus res = new ImagePlus(img.getTitle() + "_Zplus", out);
+        res.setCalibration(img.getCalibration());
+        return res;
+    }
+    public static void doBoxes(ImagePlus mask, int cx0, int cy0, int cz0) {
+        ImagePlus minus = zMinus(mask, cz0);
+        ImagePlus plus  = zPlus(mask,  cz0);
+        // 2) boxes
+        int[] boxMinus = bbox3D(minus);
+        int[] boxPlus  = bbox3D(plus);
+
+        System.out.println(String.format("Z- box: x[%d..%d] y[%d..%d] z[%d..%d]", boxMinus[0],boxMinus[1],boxMinus[2],boxMinus[3],boxMinus[4],boxMinus[5]));
+        System.out.println(String.format("Z+ box: x[%d..%d] y[%d..%d] z[%d..%d]", boxPlus[0], boxPlus[1], boxPlus[2], boxPlus[3], boxPlus[4], boxPlus[5]));
+
+        // 3) crop
+        ImagePlus cropMinus = cropZMinus(mask, cz0);
+        VitimageUtils.convertToGray8(cropMinus);
+        // cropMinus.show();
+        ImagePlus cropPlus  = cropZPlus(mask, cz0);
+        VitimageUtils.convertToGray8(cropPlus);
+        // cropPlus.show();
+        cropMinus.setTitle("Lesion_Zminus_crop"); //cropMinus.show();
+        cropPlus.setTitle("Lesion_Zplus_crop");   //cropPlus.show();
+
+        // (for later mirroring, convert global centers to local-in-crop)
+        int cyMinusLocal = cy0 - boxMinus[2];
+        int czMinusLocal = cz0 - boxMinus[4];
+        int cyPlusLocal  = cy0 - boxPlus[2];
+        int czPlusLocal  = cz0 - boxPlus[4];
+        System.out.println("locals (for mirroring later)  Z-: cy="+cyMinusLocal+" cz="+czMinusLocal+"   Z+: cy="+cyPlusLocal+" cz="+czPlusLocal);
+    }
+
+         private static int[] countForegroundPixels(Specimen specimen, String[] timestamps) {
+
+        int[] counts = new int[timestamps.length];
+
+        for (int t = 0; t < timestamps.length; t++) {
+
+            String maskPath = Config.mainDir + "Processing/04_Masks/07_MaskSurface3D/" + specimen.getName() + "_" + timestamps[t] + "_mask_contour.tif";
+
+            ImagePlus contourMask = IJ.openImage(maskPath);
+            if (contourMask == null) {
+                System.out.println("Missing: " + maskPath);
+                counts[t] = 0;
+                continue;
+            }
+            ImageStack stack = contourMask.getStack();
+            int d = contourMask.getNSlices();
+            int count = 0;
+
+            for (int z = 0; z < d; z++) {
+                byte[] pixels = (byte[]) stack.getPixels(z + 1);
+                for (int i = 0; i < pixels.length; i++) {
+                    if ((pixels[i] & 0xFF) == 255) { //Replace with your foreground value
+                        count++;
+                    }
+                }
+            }
+
+            counts[t] = count;
+              System.out.println(specimen.getName() + " @ " + timestamps[t] + " → " + count + " contour voxels");
+        }
+
+        return counts; 
+
+        }
 
 
     

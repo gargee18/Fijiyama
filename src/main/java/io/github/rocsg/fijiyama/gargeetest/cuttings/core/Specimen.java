@@ -1,5 +1,8 @@
 package io.github.rocsg.fijiyama.gargeetest.cuttings.core;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Specimen {
     private String name;
     private int condition;  // Condition index ( 0 for PCH, 1 for CT)
@@ -78,6 +81,27 @@ public class Specimen {
         return "Name="+name+" variety="+variety+" condition="+condition;
     }
 
+    public static  List<Specimen>loadAllSpecimens(){
+       //Aggregate the names of the specimen
+       List<Specimen> listSpecimen = new ArrayList<>();
+       
+        // Specimen names as given in the example
+        String[] specimenNames = {
+           "B_201", "B_202", "B_203", "B_205", "B_206",   "B_207", "B_208", "B_209", "B_210",
+           "B_211", "B_212", "B_213", "B_214", "B_215",   "B_216", "B_217", "B_218", "B_219", "B_220",
+           "B_221", "B_222", "B_223", "B_224", "B_225",   "B_226", "B_227", "B_228", "B_229", "B_230",
+           "B_231", "B_232", "B_233", "B_234", "B_235",   "B_236", "B_237", "B_238", "B_239", "B_240"
+       };
+
+       // Create Specimen objects for each specimen name
+       for (String name : specimenNames) {
+           Specimen specimen = new Specimen(name); 
+           listSpecimen.add(specimen);
+       }
+       //Transform into Specimen
+       return listSpecimen;
+    }
+
     public static void main(String[]args){
         test();
     }
@@ -87,6 +111,7 @@ public class Specimen {
         Specimen s=new Specimen("B_227");
         System.out.println(s);
         }
+
 
 }
     
