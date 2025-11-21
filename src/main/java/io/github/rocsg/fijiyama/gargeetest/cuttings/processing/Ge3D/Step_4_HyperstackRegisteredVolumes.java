@@ -10,11 +10,11 @@ import io.github.rocsg.fijiyama.gargeetest.cuttings.core.PipelineStep;
 import io.github.rocsg.fijiyama.gargeetest.cuttings.core.Specimen;
 import io.github.rocsg.fijiyama.registration.ItkTransform;
 
-public class Step_4_Hyperstack implements PipelineStep{
+public class Step_4_HyperstackRegisteredVolumes implements PipelineStep{
 
     public static void main(String[] args) throws Exception{
         Specimen spec= new Specimen("B_239");
-        new Step_4_Hyperstack().execute(spec,true); 
+        new Step_4_HyperstackRegisteredVolumes().execute(spec,true); 
     }
  
 

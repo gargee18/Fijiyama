@@ -9,12 +9,13 @@ import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_1_Subsa
 import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_2_2_CreateMask;
 import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_2_InocAlignment;
 import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_3_RegistrationRigid;
-import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_4_Hyperstack;
+import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_4_HyperstackRegisteredVolumes;
 import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_5_PolarTransform;
 import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_6_MeanIndividual;
 import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_7_ProbabilisticAtlas;
 import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_8_AxisAlignedEllipsoidFit;
 import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_9_BoundingBox;
+import io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_10_HyperStackingEllipsoids;
 import io.github.rocsg.fijiyama.gargeetest.cuttings.core.Pipeline;
 import io.github.rocsg.fijiyama.gargeetest.cuttings.core.PipelineStep;
 
@@ -69,18 +70,19 @@ public class MainController {
        steps.add(new Step_2_InocAlignment());
        steps.add(new Step_2_2_CreateMask());
        steps.add(new Step_3_RegistrationRigid());
-       steps.add(new Step_4_Hyperstack());
+       steps.add(new Step_4_HyperstackRegisteredVolumes());
        steps.add(new Step_5_PolarTransform());
        steps.add(new Step_6_MeanIndividual());
        steps.add(new Step_7_ProbabilisticAtlas());
        steps.add(new Step_8_AxisAlignedEllipsoidFit());
        steps.add(new Step_9_BoundingBox());
+       steps.add(new Step_10_HyperStackingEllipsoids());
        return steps;
    }
 
    public static ArrayList<PipelineStep>getStepsForDevPipeline(){
        ArrayList<PipelineStep> steps = new ArrayList<PipelineStep>();
-       steps.add(new Step_9_BoundingBox());
+       steps.add(new  Step_10_HyperStackingEllipsoids());
        return steps;
    }
 

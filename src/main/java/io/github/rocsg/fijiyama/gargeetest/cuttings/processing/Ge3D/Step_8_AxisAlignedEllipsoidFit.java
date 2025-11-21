@@ -26,7 +26,6 @@ import io.github.rocsg.fijiyama.gargeetest.cuttings.core.Config;
 import io.github.rocsg.fijiyama.gargeetest.cuttings.core.Specimen;
 import io.github.rocsg.fijiyama.gargeetest.cuttings.core.PipelineStep;
 import io.github.rocsg.fijiyama.gargeetest.cuttings.helpers.ImgProUtils;
-import io.github.rocsg.fijiyama.gargeetest.cuttings.testing.Step_9_AxisAlignedEllipsoidFit;
 import io.github.rocsg.fijiyama.common.VitimageUtils;
 
 public class Step_8_AxisAlignedEllipsoidFit implements PipelineStep {
@@ -45,7 +44,7 @@ public class Step_8_AxisAlignedEllipsoidFit implements PipelineStep {
 
     public static void main(String[] args) throws Exception {
         ImageJ ij = new ImageJ();
-        Specimen spec = new Specimen("B_206");
+        Specimen spec = new Specimen("B_201");
         new Step_8_AxisAlignedEllipsoidFit().execute(spec, true);
     }
 
@@ -60,14 +59,19 @@ public class Step_8_AxisAlignedEllipsoidFit implements PipelineStep {
         // visualizeResults(specimen, timestamps, cx, cy, cz);
         List<ImagePlus[]> pairs =visualizeResults(specimen, timestamps, cx, cy, cz);
         for (ImagePlus[] pair : pairs) {
-            ImagePlus minusFull = pair[0]; //minusFull.show(); 
-            IJ.saveAsTiff(minusFull, Config.mainDir + "/Results/04_EllipsoidFitting/01_MirroredEllipsoids/"+pair[0].getTitle());
-            ImagePlus plusFull  = pair[1]; //plusFull.show(); 
-            IJ.saveAsTiff(plusFull, Config.mainDir + "/Results/04_EllipsoidFitting/01_MirroredEllipsoids/"+pair[1].getTitle());
-            ImagePlus minusComposite = pair[2]; //minusComposite.show(); 
-            IJ.saveAsTiff(minusComposite, Config.mainDir + "/Results/04_EllipsoidFitting/02_FittedEllipsoids/"+pair[2].getTitle());
-            ImagePlus plusComposite  = pair[3]; //plusComposite.show(); 
-            IJ.saveAsTiff(plusComposite, Config.mainDir + "/Results/04_EllipsoidFitting/02_FittedEllipsoids/"+pair[3].getTitle());
+            ImagePlus minusFull = pair[0]; minusFull.show(); 
+            // IJ.saveAsTiff(minusFull, Config.mainDir + "/Results/04_EllipsoidFitting/01_MirroredEllipsoids/"+pair[0].getTitle());
+            ImagePlus plusFull  = pair[1]; plusFull.show(); 
+            // IJ.saveAsTiff(plusFull, Config.mainDir + "/Results/04_EllipsoidFitting/01_MirroredEllipsoids/"+pair[1].getTitle());
+            ImagePlus minusComposite = pair[2]; minusComposite.show(); 
+            // IJ.saveAsTiff(minusComposite, Config.mainDir + "/Results/04_EllipsoidFitting/02_FittedEllipsoids/"+pair[2].getTitle());
+            ImagePlus plusComposite  = pair[3]; plusComposite.show(); 
+            // IJ.saveAsTiff(plusComposite, Config.mainDir + "/Results/04_EllipsoidFitting/02_FittedEllipsoids/"+pair[3].getTitle());
+            // ImagePlus minusContour = pair[4]; //minusContour.show(); 
+            // IJ.saveAsTiff(minusContour, Config.mainDir + "/Results/04_EllipsoidFitting/03_EllipsoidContours/"+pair[4].getTitle());
+            // ImagePlus plusContour  = pair[5]; //plusContour.show(); 
+            // IJ.saveAsTiff(plusContour, Config.mainDir + "/Results/04_EllipsoidFitting/03_EllipsoidContours/"+pair[5].getTitle());
+            
         }  
     }
 
@@ -83,14 +87,13 @@ public class Step_8_AxisAlignedEllipsoidFit implements PipelineStep {
                 continue;
             }
             SymmetryResult res = buildSymmetricEllipsoids(mask, cx, cy, cz);
-
             ImagePlus res_minus = res.fullFromMinus;
             res_minus.setTitle("Negative_Z_" + specimen.getName() + "_" +  timestamps[t-1]+"_mirrored_ellipsoid"); 
-            // res_minus.show();
             ImagePlus res_plus = res.fullFromPlus;
             res_plus.setTitle("Positive_Z_" + specimen.getName() + "_" +  timestamps[t-1]+"_mirrored_ellipsoid"); 
             Result rm = fitFromImagePlus(res_minus, FOREGROUND, SUBSAMPLE);
             ImagePlus compositeMinus;
+            ImagePlus contourMinus;
             System.out.printf(java.util.Locale.US, "[NEG] %s %s: ok=%s | note=%s%n", specimen.getName(), timestamps[t-1], rm.ok, rm.note);
             if (rm.ok && rm.center != null && rm.radii != null) {
                 System.out.printf(java.util.Locale.US, "    center_negative_z_ellipsoid = [%.6f, %.6f, %.6f]\n", rm.center[0], rm.center[1], rm.center[2]);
@@ -104,20 +107,21 @@ public class Step_8_AxisAlignedEllipsoidFit implements PipelineStep {
                 double[] radii_mm_m  = new double[]{ rm.radii[0]*pw,  rm.radii[1]*ph,  rm.radii[2]*pd  };
 
                 double shellThickness = Math.max(pw, Math.max(ph, pd));
-                ImagePlus contour = generateEllipsoidContour(center_mm_m, radii_mm_m,
+                contourMinus = generateEllipsoidContour(center_mm_m, radii_mm_m,
                         res_minus.getWidth(), res_minus.getHeight(), res_minus.getNSlices(),
                         pw, ph, pd, shellThickness);
-                compositeMinus = VitimageUtils.compositeNoAdjustOf(res_minus, contour, "Composite");
+                contourMinus.setTitle("Negative_Z_" + specimen.getName() + "_" +  timestamps[t-1]+"_ellipsoid_contour");
+                compositeMinus = VitimageUtils.compositeNoAdjustOf(res_minus, contourMinus, "Composite");
                 compositeMinus.setTitle("Negative_Z_" + specimen.getName() + "_" +  timestamps[t-1]+"_fitted_ellipsoid");
-                // compositeMinus.show();
             } else {
                 System.out.printf(java.util.Locale.US,"  %s %s: ellipsoid fit invalid (note=%s) – skipping overlay.%n",specimen.getName(), timestamps[t-1], rm.note);
                 compositeMinus = blankImageSameSize(res_minus, "Negative_Z_" + specimen.getName() + "_" +  timestamps[t-1]+"_fitted_ellipsoid");
-                // compositeMinus.show();
+                contourMinus = blankImageSameSize(res_minus, "Negative_Z_" + specimen.getName() + "_" + timestamps[t-1] + "_ellipsoid_contour");
             }
 
             Result rp = fitFromImagePlus(res_plus, FOREGROUND, SUBSAMPLE);
             ImagePlus compositePlus;
+            ImagePlus contourPlus;
             System.out.printf(java.util.Locale.US, "[POS] %s %s: ok=%s | note=%s%n", specimen.getName(), timestamps[t-1], rp.ok, rp.note);
             if (rp.ok && rp.center != null && rp.radii != null) {
                 System.out.printf(java.util.Locale.US, "    center_positive_z_ellipsoid = [%.6f, %.6f, %.6f]\n", rp.center[0], rp.center[1], rp.center[2]);
@@ -133,23 +137,24 @@ public class Step_8_AxisAlignedEllipsoidFit implements PipelineStep {
                 double[] radii_mm_p  = new double[]{ rp.radii[0]*pw,  rp.radii[1]*ph,  rp.radii[2]*pd  };
 
                 double shellThickness = Math.max(pw, Math.max(ph, pd));
-                ImagePlus contour = generateEllipsoidContour(center_mm_p, radii_mm_p,
+                contourPlus = generateEllipsoidContour(center_mm_p, radii_mm_p,
                         res_plus.getWidth(), res_plus.getHeight(), res_plus.getNSlices(),
                         pw, ph, pd, shellThickness);
-                compositePlus = VitimageUtils.compositeNoAdjustOf(res_plus, contour, "Composite");
+                contourPlus.setTitle("Positive_Z_" + specimen.getName() + "_" + timestamps[t-1]+"_ellipsoid_contour");
+                compositePlus = VitimageUtils.compositeNoAdjustOf(res_plus, contourPlus, "Composite");
                 compositePlus.setTitle("Positive_Z_" + specimen.getName() + "_" + timestamps[t-1]+"_fitted_ellipsoid");
-                // compositePlus.show();
             }else {
                     System.out.printf(java.util.Locale.US,"  %s %s: ellipsoid fit invalid (note=%s) – skipping overlay.%n",specimen.getName(), timestamps[t-1], rp.note);;
                     compositePlus = blankImageSameSize(res_plus, "Positive_Z_" + specimen.getName() + "_" + timestamps[t-1]+"_fitted_ellipsoid");
-                    // compositePlus.show();   
+                    contourPlus = blankImageSameSize(res_plus, "Positive_Z_" + specimen.getName() + "_" + timestamps[t-1] + "_ellipsoid_contour");
                 }
-                //allPairs.add(new ImagePlus[]{compositeMinus, compositePlus});
-                ImagePlus[] out = new ImagePlus[4];
+                ImagePlus[] out = new ImagePlus[6];
                 out[0] = res_minus;
                 out[1] = res_plus;
                 out[2] = compositeMinus;
                 out[3] = compositePlus;
+                out[4] = contourMinus;
+                out[5] = contourPlus;
                 allPairs.add(out);
         }
         return allPairs;
@@ -687,95 +692,7 @@ public class Step_8_AxisAlignedEllipsoidFit implements PipelineStep {
 
 
 
-   public static ImagePlus buildHyperFrameofEllipFits(List<ImagePlus[]> ellipsoidChannels, String title) {
-
-        if (ellipsoidChannels == null || ellipsoidChannels.isEmpty()) {
-            System.err.println("buildHyperFrameOfEllipFits: empty ellipsoidChannels list");
-            return null;
-        }
-
-        // ---- Find a reference image to get w, h, z ----
-        ImagePlus ref = null;
-        for (ImagePlus[] chans : ellipsoidChannels) {
-            if (chans == null) continue;
-            for (ImagePlus imp : chans) {
-                if (imp != null) {
-                    ref = imp;
-                    break;
-                }
-            }
-            if (ref != null) break;
-        }
-        if (ref == null) {
-            System.err.println("buildHyperFrameOfEllipFits: no non-null images found");
-            return null;
-        }
-
-        int w  = ref.getWidth();
-        int h  = ref.getHeight();
-        int nZ = ref.getNSlices();
-        int nT = ellipsoidChannels.size();
-        int nC = 4; // [0]=neg full, [1]=pos full, [2]=neg comp, [3]=pos comp
-
-        System.out.println("HyperFrame dims: W=" + w + " H=" + h + " Z=" + nZ + " T=" + nT + " C=" + nC);
-
-        ImagePlus hyper = IJ.createHyperStack(title, w, h, nC, nZ, nT, 8);
-        hyper.setCalibration(ref.getCalibration());
-
-        for (int t = 0; t < nT; t++) {
-            ImagePlus[] chans = ellipsoidChannels.get(t);
-            if (chans == null || chans.length < 4) {
-                System.err.println("Time " + t + ": ellipsoidChannels missing entries");
-                continue;
-            }
-
-            ImagePlus negFull    = chans[0]; // C1
-            ImagePlus posFull    = chans[1]; // C2
-            ImagePlus negComp    = chans[2]; // C3
-            ImagePlus posComp    = chans[3]; // C4
-
-            for (int z = 0; z < nZ; z++) {
-
-                // ---- Channel 1: negative full ellipsoid ----
-                if (negFull != null && negFull.getNSlices() > z) {
-                    hyper.setPosition(0, z + 1, t + 1);
-                    ImageProcessor src  = negFull.getStack().getProcessor(z + 1);
-                    ImageProcessor src8 = src.convertToByte(true);
-                    hyper.getProcessor().setPixels(src8.getPixels());
-                }
-
-                // ---- Channel 2: positive full ellipsoid ----
-                if (posFull != null && posFull.getNSlices() > z) {
-                    hyper.setPosition(1, z + 1, t + 1);
-                    ImageProcessor src  = posFull.getStack().getProcessor(z + 1);
-                    ImageProcessor src8 = src.convertToByte(true);
-                    hyper.getProcessor().setPixels(src8.getPixels());
-                }
-
-                // ---- Channel 3: negative composite ----
-                if (negComp != null && negComp.getNSlices() > z) {
-                    hyper.setPosition(2, z + 1, t + 1);
-                    ImageProcessor src  = negComp.getStack().getProcessor(z + 1);
-                    ImageProcessor src8 = src.convertToByte(true);
-                    hyper.getProcessor().setPixels(src8.getPixels());
-                }
-
-                // ---- Channel 4: positive composite ----
-                if (posComp != null && posComp.getNSlices() > z) {
-                    hyper.setPosition(3, z + 1, t + 1);
-                    ImageProcessor src  = posComp.getStack().getProcessor(z + 1);
-                    ImageProcessor src8 = src.convertToByte(true);
-                    hyper.getProcessor().setPixels(src8.getPixels());
-                }
-            }
-        }
-
-        hyper.resetStack();
-        return hyper;
-    }
-
    
-    
    
         
 }

@@ -6,6 +6,34 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Step_10_HyperStackingEllipsoids",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_10_HyperStackingEllipsoids",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "shit",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.helpers.shit",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "HyperFrameEllipsoids",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.helpers.HyperFrameEllipsoids",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
+            "name": "Step_4_Hyperstack",
+            "request": "launch",
+            "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_4_Hyperstack",
+            "projectName": "fijiyama"
+        },
+        {
+            "type": "java",
             "name": "Step_9_BoundingBox",
             "request": "launch",
             "mainClass": "io.github.rocsg.fijiyama.gargeetest.cuttings.processing.Ge3D.Step_9_BoundingBox",

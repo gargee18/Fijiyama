@@ -78,7 +78,7 @@ public class Config {
     }
     // Get Transformation Matrix for Auto Rigid Registration
     public static String getPathToAutoRigidRegistrationMatrix(Specimen specimen, int stepRef, int stepMov){
-        return mainDir+"Processing/02_RigidRegistration/"+specimen.getName()+"_"+timestamps[stepRef]+"_"+timestamps[stepMov]+"_TR_MAT_Rigid_Reg_auto.txt";
+        return mainDir+"Processing/02_RigidRegistration/"+specimen.getName()+"_"+timestamps[stepRef]+"_"+timestamps[stepMov]+"_TR_MAT_Rigid_Reg.txt";
     }
 
     //Get Polar Transformed Images Directory
